@@ -1,47 +1,48 @@
-# [LFP]Proyecto1_202044192
+# LFP_Proyecto2_202044192
 
 ## 1. DESCRIPCIÓN GENERAL
 
-### 1.1 OBJETIVO GENERAL
+### OBJETIVO GENERAL
 
-Que el estudiante cree una herramienta la cual sea capaz de reconocer un lenguaje, dado por medio de un analizador léxico el cual cumple con las reglas establecidas, manejando la lectura
-y escritura de archivos para el manejo de la información. A través de un entorno gráfico.
+Combinar los conocimientos adquiridos en el curso y en los otros cursos de sistemas, para
+crear un compilador que traduzca el lenguaje especificado y lo transforme en Sentencias de
+Bases de Datos No Relacionales.
 
-### 1.2 OBJETIVOS ESPECÍFICOS
+### OBJETIVOS ESPECÍFICOS
 
-- Implementar por medio de estados un analizador léxico.
-- Utilizar funciones de manejo de cadenas de caracteres en lenguaje Python.
-- Programar un Scanner para el análisis léxico.
-- Construir un scanner basándose en un autómata finito determinístico.
-- Crear una herramienta para interactuar de forma visual con el usuario con Tkinter
+- Crear una herramienta que permita el diseño de sentencias de base de datos no
+  relacionales de una forma sencilla para el usuario.
+- Diseñar y construir un compilador que permita compilar archivos de entrada y
+  visualizar el resultado en un entorno externo.
+- Desarrollar la habilidad del estudiante para elaborar proyectos en base a una adecuada
+  planificación para que aprendan la manera en la que tienen que trabajar.
 
-### 1.3 DESCRIPCIÓN
+### DESCRIPCIÓN
 
-Se solicita la lectura de código fuente, el cual tendrá un formato JSON, creando un programa el
-cual sea capaz de identificar un lenguaje dado, identificando los errores léxicos y ejecutando las
-instrucciones correspondientes.
+El proyecto consiste en la elaboración de una herramienta que permita el diseño y creación
+de sentencias de bases de datos no relacionales de una forma sencilla. La aplicación tendrá
+un área de edición de código y un área de visualización de la sentencia final generada.
 
-Se listarán una serie de instrucciones las cuales deben de ser ejecutadas, cumpliendo con el
-formato asignado, generándolo un resultado y graficarlos en un archivo según la jerarquía
-operacional de cada instrucción. **Colocando el resultado en cada nodo que aplique.**
-
-Los errores deben ser generados en un archivo JSON.
+Cuando ya se cuente con las sentencias creadas inicialmente, se procederá a realizar la
+compilación respectiva lo que generar las sentencias de MongoDB que serán mostradas en el
+espacio de resultados que posteriormente se podrán aplicar a un entorno adecuado a
+MongoDb.
 
 ## 2. CARACTERÍSTICAS DE LA SOLUCIÓN
 
-Para responder a las necesidades que se le plantean, se ha pensado en el desarrollo de una
-aplicación en lenguaje Python que permita reconocer las distintas instrucciones, y la ejecución
-de las mismas. Con el objetivo que se implemente el análisis léxico correspondiente.
+Para poder responder a las necesidades expuestas anteriormente, se ha pensado en el
+desarrollo de una aplicación en lenguaje Python que permitirá la creación de las sentencias
+básicas para ejecutar código de MongoDB.
 
-Se deben de mostrar de manera funcional y agradable al usuario resumen de errores
-detectados, así como el resultado de las operaciones realizadas en cada una de las funciones
-que se describen más adelante, así como su respectivo archivo en forma gráfica (árbol de
-operaciones, incluyendo el resultado en cada nodo que aplique).
+Con la ayuda de métodos como: Árbol y parser descendente de llamadas recursivas, se deberá
+implementar una solución que reconozca archivos de texto que contendrán la definición de
+las sentencias que se usaran en MongoDb, así como sus características particulares de cada
+sentencia.
 
-### 2.1 DISEÑO DE LA INTERFAZ
+La aplicación deberá mostrar los errores que puedan existir en el archivo de entrada que se
+esté analizando, se deben visualizar de manera agradable y con la suficiente información para
+saber dónde ocurre el error. Al no encontrarse errores se procede a traducir lo que el archivo
+de entrada requiere que se haga.
 
-En la aplicación se deberán demostrar como mínimo los siguientes menús, tomando en cuenta
-que deberá de ser totalmente gráfica.
-
-- menú
-- Ayuda
+En cualquier momento se pueden colocar comentarios dentro de cada bloque de código del
+programa, estos son de la manera cómo funciona en las bases de datos
