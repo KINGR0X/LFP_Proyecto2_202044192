@@ -17,7 +17,7 @@ class Pantalla_principal():
         self.pp = Tk()
         self.pp.title("Pantalla Principal | Proyecto 1")
         self.centrar(self.pp, 1000, 800)
-        self.pp.configure(bg="#102027")
+        self.pp.configure(bg="#343541")
         self.pantalla_1()
 
     def centrar(self, r, ancho, alto):
@@ -28,75 +28,133 @@ class Pantalla_principal():
         r.geometry(f"+{x}+{y}")
 
     def pantalla_1(self):
-        self. Frame = Frame(height=500, width=1100)
-        self.Frame.config(bg="#37474f")
+        self.Frame = Frame(height=600, width=1100)
+        self.Frame.config(bg="#343541")
         self.Frame.pack(padx=25, pady=25)
         self.text = ''
         posicionx1 = 480
-        posicionx2 = 809
         self.analizado = False
 
-        # encabezado de Archivo
-        Label(self.Frame, text="Archivo", font=(
-            "Roboto Mono", 24), fg="white",
-            bg="#19A7CE", width=18, justify="center").place(x=405, y=0)
-        # botones de Archivo
-        Button(self.Frame, command=self.abrirArchivo, text="Abrir archivo", font=(
-            "Roboto Mono", 20), fg="black",
-            bg="white", width=12).place(x=posicionx1, y=60)
+        # encabezado de cuadro de texto de entrada
+        Label(self.Frame, text="Entrada", font=(
+            "Roboto Mono", 18), fg="white",
+            bg="#343541", width=10, justify="left", anchor="w").place(x=0, y=0)
 
-        Button(self.Frame, command=self.guardar, text="Guardar", font=(
-            "Roboto Mono", 20), fg="black",
-            bg="white", width=12).place(x=posicionx1, y=130)
+        # encabezado de cuadro de texto de salida
+        Label(self.Frame, text="Salida", font=(
+            "Roboto Mono", 18), fg="white",
+            bg="#343541", width=10, justify="left", anchor="w").place(x=623, y=0)
 
-        Button(self.Frame, command=self.guardarComo, text="Guardar como", font=(
-            "Roboto Mono", 20), fg="black",
-            bg="white", width=12).place(x=posicionx1, y=200)
+        # menu archivo
+        self.menubar = Menu(self.pp)
 
-        Button(self.Frame, command=self.ejecutar, text="Analizar", font=(
-            "Roboto Mono", 20), fg="black",
-            bg="white", width=12).place(x=posicionx1, y=270)
+        # === Opciones del menu Archivo ===
+        archivoMenu = Menu(self.menubar, tearoff=0)
 
-        Button(self.Frame, command=self.getErrores, text="Errores", font=(
-            "Roboto Mono", 20), fg="black",
-            bg="white", width=12).place(x=posicionx1, y=340)
+        archivoMenu .add_command(
+            label="Nuevo", command=self.nuevo, font=("Roboto Mono", 13))
+        archivoMenu .add_command(
+            label="Abrir", command=self.abrirArchivo, font=("Roboto Mono", 13))
+        archivoMenu .add_command(
+            label="Guardar", command=self.guardar, font=("Roboto Mono", 13))
+        archivoMenu .add_command(label="Guardar Como",
+                                 command=self.guardarComo, font=("Roboto Mono", 13))
+        archivoMenu.add_separator()
+        archivoMenu .add_command(
+            label="Salir", command=self.pp.destroy, font=("Roboto Mono", 13))
+        self.menubar.add_cascade(
+            label="Archivo", menu=archivoMenu, font=("Roboto Mono", 13))
 
-        Button(self.Frame, command=self.pp.destroy, text="Salir", font=(
-            "Roboto Mono", 20), fg="black",
-            bg="white", width=12).place(x=posicionx1, y=410)
+        # === Menu analizar ===
 
-        # encabezado de Ayuda
-        Label(self.Frame, text="Ayuda", font=(
-            "Roboto Mono", 24), fg="white",
-            bg="#19A7CE", width=18, justify="center").place(x=755, y=0)
+        analizarMenu = Menu(self.menubar, tearoff=0)
 
-        # botones de Ayuda
+        analizarMenu .add_command(
+            label="Analizar", command=self.analizar, font=("Roboto Mono", 13))
 
-        Button(self.Frame, command=self.ManualUsuario, text="Manual de usuario", font=(
-            "Roboto Mono", 20), fg="black",
-            bg="white", width=14).place(x=posicionx2, y=60)
+        self.menubar.add_cascade(
+            label="Analizar", menu=analizarMenu, font=("Roboto Mono", 13))
 
-        Button(self.Frame, command=self.ManualTecnico, text="Manual técnico", font=(
-            "Roboto Mono", 20), fg="black",
-            bg="white", width=14).place(x=posicionx2, y=130)
+        # === Menu Tokens ===
 
-        Button(self.Frame, command=self.TemasDeAyuda, text="Temas de ayuda", font=(
-            "Roboto Mono", 20), fg="black",
-            bg="white", width=14).place(x=posicionx2, y=200)
+        TokensMenu = Menu(self.menubar, tearoff=0)
 
-        self.cuadroTexto = scrolledtext.ScrolledText(self.Frame, font=(
-            "Times New Roman", 15), fg='white', bg="#45545c", width=39, height=23)
+        TokensMenu.add_command(
+            label="Tokens", command=self.tokens, font=("Roboto Mono", 13))
 
-        self.cuadroTexto.place(x=0, y=0)
+        self.menubar.add_cascade(
+            label="Tokens", menu=TokensMenu, font=("Roboto Mono", 13))
 
-        # self.scrollbar_x = Scrollbar(
-        #     self.cuadroTexto, orient=HORIZONTAL, command=self.cuadroTexto.xview)
+        # === Menu Errores ===
 
-        # self.scrollbar_x.place(x=0, y=0)
+        erroresMenu = Menu(self.menubar, tearoff=0)
 
-        # self.cuadroTexto.config(xscrollcommand=self.scrollbar_x.set)
+        erroresMenu.add_command(
+            label="Errores", command=self.errores, font=("Roboto Mono", 13))
 
+        self.menubar.add_cascade(
+            label="Errores", menu=erroresMenu, font=("Roboto Mono", 13))
+
+        # confiuracion del menubar
+
+        self.pp.config(menu=self.menubar)
+
+        # cuadro de texto de entrada
+        textContainer = Frame(self.pp, borderwidth=1, relief="sunken")
+
+        text = Text(textContainer, font=(
+            "Times New Roman", 15), fg='white', bg="#444654", width=45, height=24, wrap="none")
+
+        textVsb = Scrollbar(
+            textContainer, orient="vertical", command=text.yview)
+        textHsb = Scrollbar(
+            textContainer, orient="horizontal", command=text.xview)
+        text.configure(yscrollcommand=textVsb.set, xscrollcommand=textHsb.set)
+
+        text.grid(row=0, column=0, sticky="nsew")
+        textVsb.grid(row=0, column=1, sticky="ns")
+        textHsb.grid(row=1, column=0, sticky="ew")
+
+        textContainer.grid_rowconfigure(0, weight=1)
+        textContainer.grid_columnconfigure(0, weight=1)
+
+        textContainer.place(x=28, y=53)
+
+        # cuadro de texto de salida
+        textContainerSalida = Frame(self.pp, borderwidth=1, relief="sunken")
+
+        text = Text(textContainerSalida, font=(
+            "Times New Roman", 15), fg='white', bg="#444654", width=45, height=24, wrap="none")
+
+        textVsb = Scrollbar(
+            textContainerSalida, orient="vertical", command=text.yview)
+        textHsb = Scrollbar(
+            textContainerSalida, orient="horizontal", command=text.xview)
+        text.configure(yscrollcommand=textVsb.set, xscrollcommand=textHsb.set)
+
+        text.grid(row=0, column=0, sticky="nsew")
+        textVsb.grid(row=0, column=1, sticky="ns")
+        textHsb.grid(row=1, column=0, sticky="ew")
+
+        textContainerSalida.grid_rowconfigure(0, weight=1)
+        textContainerSalida.grid_columnconfigure(0, weight=1)
+
+        textContainerSalida.place(x=650, y=53)
+
+        # Actualizacion del Frame
         self.Frame.mainloop()
+
+    def nuevo(self):
+        messagebox.showinfo("Nuevo", "Boton de Nuevo presionado")
+
+    def analizar(self):
+        messagebox.showinfo("Analizar", "Boton de Analizar presionado")
+
+    def tokens(self):
+        messagebox.showinfo("Tokens", "Boton de Tokens presionado")
+
+    def errores(self):
+        messagebox.showinfo("Errores", "Boton de Errores presionado")
 
     def abrirArchivo(self):
         self.analizado = False
@@ -206,37 +264,6 @@ class Pantalla_principal():
                 "Error", "No se ha podido generar el archivo de errores")
             return
 
-    def ManualUsuario(self):
-        try:
-            # obtener direccion actual
-            ruta = os.path.abspath("Manual_de_usuario.md")
 
-            print(ruta)
-
-            # se abre el archivo co Visual Studio Code
-            os.system(f'code {ruta}')
-        except:
-            messagebox.showerror(
-                "Error", "No se ha podido abrir el archivo, asegurese de tener instalado Visual Studio Code")
-            return
-
-    def ManualTecnico(self):
-        try:
-            # obtener direccion actual
-            ruta = os.path.abspath("Manual_tecnico.md")
-
-            print(ruta)
-
-            # se abre el archivo co Visual Studio Code
-            os.system(f'code {ruta}')
-        except:
-            messagebox.showerror(
-                "Error", "No se ha podido abrir el archivo, asegurese de tener instalado Visual Studio Code")
-            return
-
-    def TemasDeAyuda(self):
-        messagebox.showinfo(
-            "Temas de ayuda", "Nombre: Elian Angel Fernando Reyes Yac\nCarnet: 202044192\nCurso:Lenguajes Formales y de Poramación\nSección: B+\n")
-
-        # mostrar pantalla
+# mostrar pantalla
 r = Pantalla_principal()
