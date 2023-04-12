@@ -7,6 +7,7 @@ class Lexema(Expression):
         self.lexema = lexema
         super().__init__(fila, columna)
 
+    # es practicamente un get
     def operar(self, arbol):
         return self.lexema
 

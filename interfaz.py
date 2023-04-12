@@ -124,7 +124,7 @@ class Pantalla_principal():
         textContainerSalida = Frame(self.pp, borderwidth=1, relief="sunken")
 
         text = Text(textContainerSalida, font=(
-            "Times New Roman", 15), fg='white', bg="#444654", width=45, height=24, wrap="none")
+            "Times New Roman", 15), fg='white', bg="#444654", width=45, height=24, wrap="none", state=DISABLED)
 
         textVsb = Scrollbar(
             textContainerSalida, orient="vertical", command=text.yview)
