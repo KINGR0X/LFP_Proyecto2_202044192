@@ -3,9 +3,9 @@ from Abstract.abstract import Expression
 
 class Errores(Expression):
 
-    def __init__(self, lexema, fila, columna):
+    def __init__(self, lexema, fila, columna, token):
         self.lexema = lexema
-        super().__init__(fila, columna)
+        super().__init__(fila, columna, token)
 
     def operar(self, no):
         no_ = f'\t\t"No.":{no}\n'
@@ -23,3 +23,6 @@ class Errores(Expression):
 
     def getFila(self):
         return super().getFila()
+
+    def getToken(self):
+        return super().getToken()

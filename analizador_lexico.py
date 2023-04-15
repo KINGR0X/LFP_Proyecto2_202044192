@@ -1,15 +1,45 @@
 from Abstract.lexema import *
 from Errores.errores import *
 
+#  token | lexema
+reserved = {
+    "Funcion_CrearBD": "CrearBD",
+    "Funcion_EliminarBD": "EliminarBD",
+    "Funcion_CrearColeccion": "CrearColeccion",
+    "Funcion_EliminarColeccion": "EliminarColeccion",
+    "Funcion_insertarUnico": "InsertarUnico",
+    "Funcion_ActualizarUnico": "ActualizarUnico",
+    "Funcion_EliminarUnico": "EliminarUnico",
+    "Funcion_BuscarTodo": "BuscarTodo",
+    "Funcion_BuscarUnico": "BuscarUnico",
+    "Reservada_nueva": "nueva",
+    "Argumento": "argumento",
+    "Parte_json": "parte_json",
+    "Igual": "=",
+    "Parentesis_izquierdo": "(",
+    "Parentesis_derecho": ")",
+    "DosPuntos": ":",
+    "PuntoComa": ";",
+    "Coma": ",",
+    "Llave_izquierda": "{",
+    "Llave_derecha": "}",
+    # NOTA: las comillas no son Tokens
+}
+
 global n_linea
 global n_columna
 global lista_lexemas
 global lista_errores
+global lista_tokens
+
 
 n_linea = 1
 n_columna = 1
 lista_lexemas = []
 lista_errores = []
+
+lista_tokens=[]
+
 
 
 def instruccion(cadena):
@@ -32,7 +62,7 @@ def instruccion(cadena):
             if lexema:
 
                 # Armado de lexema como clase
-                l = Lexema(lexema, n_linea, n_columna)
+                l = Lexema(lexema, n_linea, n_columna,None)
 
                 # se guarda el lexema en la lista
                 lista_lexemas.append(l)
@@ -42,7 +72,7 @@ def instruccion(cadena):
 
         elif char == "=":
             # Armado de lexema como clase
-            c = Lexema(char, n_linea, n_columna)
+            c = Lexema(char, n_linea, n_columna,None)
 
             n_columna += 1
             lista_lexemas.append(c)
@@ -50,41 +80,61 @@ def instruccion(cadena):
             puntero = 0
 
         elif char == '(':
-            # se envia al metodo la cadena sin la comilla inicial
-            lexema, cadena = armar_data(cadena[puntero:])
+            # Armado de lexema como clase
+            c = Lexema(char, n_linea, n_columna,None)
+
+            n_columna += 1
+            lista_lexemas.append(c)
+            cadena = cadena[1:]
+            puntero = 0
+
+        # comillas que usa argumento de la funcion 
+        elif char == '“':
+            # se envia al metodo la cadena Con la comilla inicial
+            lexema, cadena = armar_parametro(cadena[puntero-1:])
             # si no es None ninguna de las dos condiciones entonces
             if lexema and cadena:
-                # +1 por el parentesis
-                n_columna += 1
 
                 # Armado de lexema como clase
-                l = Lexema(lexema, n_linea, n_columna)
+                l = Lexema(lexema, n_linea, n_columna,None)
 
                 # se guarda el lexema en la lista
                 lista_lexemas.append(l)
 
                 # por el parentesis
-                n_columna += len(lexema)+1
+                n_columna += len(lexema)
                 puntero = 0
 
-        elif char == ',':
-            # se envia al metodo la cadena sin la comilla inicial
-            lexema, cadena = armar_json(cadena[puntero:])
+        # Comillas que usan los valores del Json, es la misma de apertura y de cierre
+        elif char == '"':
+            # si no es None ninguna de las dos condiciones entonces
+            lexema, cadena = armar_dato_json(cadena[puntero:])
             # si no es None ninguna de las dos condiciones entonces
             if lexema and cadena:
 
+
                 # Armado de lexema como clase
-                l = Lexema(lexema, n_linea, n_columna)
+                l = Lexema(lexema, n_linea, n_columna,None)
 
                 # se guarda el lexema en la lista
                 lista_lexemas.append(l)
 
+
                 n_columna += len(lexema)
                 puntero = 0
 
+        elif char == ',':
+            # Armado de lexema como clase
+            c = Lexema(char, n_linea, n_columna,None)
+
+            n_columna += 1
+            lista_lexemas.append(c)
+            cadena = cadena[1:]
+            puntero = 0
+
         elif char == '{':
             # Armado de lexema como clase
-            c = Lexema(char, n_linea, n_columna)
+            c = Lexema(char, n_linea, n_columna,None)
 
             n_columna += 1
             lista_lexemas.append(c)
@@ -93,14 +143,40 @@ def instruccion(cadena):
 
         elif char == '}':
             # Armado de lexema como clase
-            c = Lexema(char, n_linea, n_columna)
+            c = Lexema(char, n_linea, n_columna,None)
 
             n_columna += 1
             lista_lexemas.append(c)
             cadena = cadena[1:]
             puntero = 0
 
-        # simbolos a ignorara
+        elif char == ':':
+            # Armado de lexema como clase
+            c = Lexema(char, n_linea, n_columna,None)
+
+            n_columna += 1
+            lista_lexemas.append(c)
+            cadena = cadena[1:]
+            puntero = 0
+
+        elif char == ")":
+           # Armado de lexema como clase
+            c = Lexema(char, n_linea, n_columna,None)
+
+            n_columna += 1
+            lista_lexemas.append(c)
+            cadena = cadena[1:]
+            puntero = 0
+
+        elif char == ";":
+            # Armado de lexema como clase
+            c = Lexema(char, n_linea, n_columna,None)
+
+            n_columna += 1
+            lista_lexemas.append(c)
+            cadena = cadena[1:]
+            puntero = 0
+
         elif char == "\t":
             cadena = cadena[4:]
             n_columna += 4
@@ -108,17 +184,11 @@ def instruccion(cadena):
 
         elif char == "\n":
             cadena = cadena[1:]
-            n_columna = 0
+            n_columna = 1
             n_linea += 1
             puntero = 0
 
-        elif char == ";":
-            cadena = cadena[1:]
-            n_columna = 0
-            n_linea += 1
-            puntero = 0
-
-        elif char == ' ' or char == '\r' or char == ':' or char == '.':
+        elif char == ' ' or char == '\r' or char == '”':
             cadena = cadena[1:]
             n_columna += 1
             puntero = 0
@@ -127,13 +197,7 @@ def instruccion(cadena):
             cadena = cadena[1:]
             puntero = 0
             n_columna += 1
-            lista_errores.append(Errores(char, n_linea, n_columna))
-
-    i = 0
-
-    # for lexema in lista_lexemas:
-    #     i = i+1
-    #     print(i, lexema.operar(None))
+            lista_errores.append(Errores(char, n_linea, n_columna,None))
 
     return lista_lexemas
 
@@ -147,7 +211,8 @@ def armar_lexema(cadena):
     # se recorre toda la cadena con el puntero hasta encontrar un espacio en blanco
     for char in cadena:
         puntero += char
-        if char == ' ' or char == ';' or char == "(":
+        # Coloque las comillas en caso de que falte el parentesis 
+        if char == ' '  or char == "(" or char == '“' or char=='"':
             # en cadena el slicing devuelce desde uno antes del puntero hasta el final
             return lexema, cadena[len(puntero)-1:]
         else:
@@ -157,7 +222,7 @@ def armar_lexema(cadena):
     return None, None
 
 
-def armar_data(cadena):
+def armar_parametro(cadena):
     global n_linea
     global n_columna
     global lista_lexemas
@@ -167,10 +232,8 @@ def armar_data(cadena):
     for char in cadena:
         puntero += char
 
-        if char == '{' or char == "\n":
-            n_linea += 1
-
-        if char == ')' or char == ',':
+        # Como las mismas comillas se usan para los argumentos de la funcion y para abrir el Json coloque el espacio en blanco y el salto
+        if char == ')' or char == ';' or char == ',' or char== ' ' or char=='\n' :
             # en cadena el slicing devuelce desde uno antes del puntero hasta el final
             return lexema, cadena[len(puntero)-1:]
 
@@ -180,28 +243,111 @@ def armar_data(cadena):
     # para evitar que se detenga el problema en caso de un error
     return None, None
 
-
-def armar_json(cadena):
+def armar_dato_json(cadena):
     global n_linea
     global n_columna
     global lista_lexemas
     lexema = ""
     puntero = ""
+
     # se recorre toda la cadena con el puntero hasta encontrar un espacio en blanco
     for char in cadena:
         puntero += char
-        if char == ')':
-            # en cadena el slicing devuelce desde uno antes del puntero hasta el final
-            return lexema, cadena[len(puntero)-1:]
+
+        if char == '"':
+            # Se le colocan las comillas al inicio y al final, porque se supone que eso siempre va a venir
+            return  char+lexema+char,cadena[len(puntero):]
 
         else:
             # se va agregando letra por letra al lexema
             lexema += char
     # para evitar que se detenga el problema en caso de un error
     return None, None
+
+
+def asignarToken():
+    lista_solo_lexemas = []
+
+    # lista de solo los lexemas, sin columna ni nada
+    for i in range(len(lista_lexemas)):
+        lista_solo_lexemas.append(lista_lexemas[i].operar(None))
+
+
+    # Recorrer la lista para guardar los tokens
+
+    print("Tamaño de la lista al INICIO===>",len(lista_solo_lexemas))
+    i = 0
+    while i < len(lista_solo_lexemas):
+        if lista_solo_lexemas[i] in reserved.values():
+            # Se obtiene la clave del valor que se encontro en el diccionario y se guarda en tpken
+            token = list(reserved.keys())[list(reserved.values()).index(lista_solo_lexemas[i])]
+            print("Lexema: ", lista_solo_lexemas[i]," | ", "Token: ", token)
+            lista_solo_lexemas.remove(lista_solo_lexemas[i])
+        else:
+            i += 1
+            print(f"El valor '{lista_solo_lexemas[i-1]}' no está en el diccionario.")
+    print("Tamaño de la lista===>",len(lista_solo_lexemas))
+
+    print(" ")
+    print("============ Round 2 ============")
+
+    # Guardar como tokens los argumentos, se supone que siempre van a venir con las comillas
+    i = 0
+    while i < len(lista_solo_lexemas):
+        if lista_solo_lexemas[i][0] == '“' and lista_solo_lexemas[i][-1] == '”':  
+
+            print("Lexema: ", lista_solo_lexemas[i]," | ", "Token: ", "Argumento")
+            lista_solo_lexemas.remove(lista_solo_lexemas[i])
+        else:
+            i += 1
+            print(f"El valor '{lista_solo_lexemas[i-1]}' no está en el diccionario.")
+
+    print("Tamaño de la lista===>",len(lista_solo_lexemas))
+
+    print(" ")
+    print("============ Round 3 ============")
+
+    # Guardar Como tokens los valores del Json, se supone que siempre van a venir con las comillas
+    i = 0
+    while i < len(lista_solo_lexemas):
+        if lista_solo_lexemas[i][0] == '"' and lista_solo_lexemas[i][-1] == '"':  
+
+            print("Lexema: ", lista_solo_lexemas[i]," | ", "Token: ", "Parte_json")
+            lista_solo_lexemas.remove(lista_solo_lexemas[i])
+        else:
+            i += 1
+            print(f"El valor '{lista_solo_lexemas[i-1]}' no está en el diccionario.")
+
+    print("Tamaño de la lista===>",len(lista_solo_lexemas))
+
+
+    print(" ")
+    print("============ Round FINAL ============")
+
+    # Guardar Como tokens los valores del Json, se supone que siempre van a venir con las comillas
+    i = 0
+    while i < len(lista_solo_lexemas):
+        # Se supone que esa llave del Json no viene, por eso la ignoro
+        if lista_solo_lexemas[i]!= '“' :  
+            print("Lexema: ", lista_solo_lexemas[i]," | ", "Token: ", "Parte_json")
+            lista_solo_lexemas.remove(lista_solo_lexemas[i])
+        else:
+            i += 1
+            print(f"El valor '{lista_solo_lexemas[i-1]}' no está en el diccionario.")
+
+    print("Tamaño de la lista===>",len(lista_solo_lexemas))
+
+
+
+    
+
+    # Los valores restantes de lista_solo_lexemas deberian de ser identificadores
+
+
+    
+
 
 # === Es una prueba, aun esta muy verde===
-
 
 def TablaTokens():
 
@@ -210,77 +356,32 @@ def TablaTokens():
     for i in range(len(lista_lexemas)):
         print("=====================================")
         print("Lexema ==>", lista_lexemas[i].operar(None))
+        print("Token ==>", lista_lexemas[i].getToken())
         print("Fila ==>", lista_lexemas[i].getFila())
         print("Columna ==>", lista_lexemas[i].getColumna())
 
-
-cadenaP = '''
-
-CrearBD ejemplo = nueva CrearBD("Data");
-
-EliminarBD elimina = nueva EliminarBD("Data");
-
-CrearColeccion colec = nueva CrearColeccion(“NombreColeccion”);
-
-InsertarUnico insertadoc = nueva InsertarUnico(“NombreColeccion” ,
-“
-    { 
-        "nombre" : "Obra Literaria", 
-        "autor" : "Jorge Luis" 
-    } 
-”); 
-
-ActualizarUnico actualizadoc = nueva ActualizarUnico(“NombreColeccion”, 
-“
-    { 
-        "nombre" : "Obra Literaria" 
-    }, 
-    { 
-        $set: {"autor" : "Mario Vargas"} 
-    } 
-”);
-
-'''
-
-
 entrada = '''
 
-CrearBD ejemplo = nueva CrearBD(); 
+CrearBD ejemplo = nueva CrearBD(“Data”); 
 
-EliminarBD elimina = nueva EliminarBD(); 
-
-CrearColeccion colec = nueva CrearColeccion(“NombreColeccion”); 
+EliminarBD elimina = nueva EliminarBD(“Data”); 
 
 InsertarUnico insertadoc = nueva InsertarUnico(“NombreColeccion” ,
 “
-    { 
-        "nombre" : "Obra Literaria", 
-        "autor" : "Jorge Luis" 
-    } 
-”); 
-
-ActualizarUnico actualizadoc = nueva ActualizarUnico(“NombreColeccion”, 
-“
-    { 
-        "nombre" : "Obra Literaria" 
-    }, 
-    { 
-        $set: {"autor" : "Mario Vargas"} 
-    } 
+{ 
+ "nombre" : "Obra Literaria", 
+ "autor" : "Jorge Luis" 
+ } 
 ”);
 
-EliminarUnico eliminadoc = nueva EliminarUnico(“NombreColeccion”,
-“
-    { 
-        "nombre" : "Obra Literaria" 
-    } 
-”);
-
-BuscarTodo todo = nueva BuscarTodo (“NombreColeccion”); 
-
-BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”); 
 '''
 
-instruccion(cadenaP)
+instruccion(entrada)
 
-TablaTokens()
+asignarToken()
+
+# TablaTokens()
+
+# print("==== ERRORES ====")
+# for error in lista_errores:
+#     print("ERROR: ", error.operar(None))
