@@ -26,3 +26,6 @@ class Errores(Expression):
 
     def getToken(self):
         return super().getToken()
+
+    def setToken(self, token):
+        super().setToken("Error")

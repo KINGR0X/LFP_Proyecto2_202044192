@@ -23,3 +23,7 @@ class Expression(ABC):
     @abstractmethod
     def getToken(self):
         return self.token
+
+    @abstractmethod
+    def setToken(self, token):
+        self.token = token

@@ -23,6 +23,7 @@ reserved = {
     "Coma": ",",
     "Llave_izquierda": "{",
     "Llave_derecha": "}",
+    "Funcion_$set": "$set:"
     # NOTA: las comillas no son Tokens
 }
 
@@ -53,7 +54,7 @@ def instruccion(cadena):
         char = cadena[puntero]
         puntero += 1
 
-        if char.isalpha():
+        if char.isalpha() or char== '$':
 
             # se envia al metodo la cadena desde el puntero hasta el final
             lexema, cadena = armar_lexema(cadena[puntero-1:])
@@ -196,8 +197,9 @@ def instruccion(cadena):
         else:
             cadena = cadena[1:]
             puntero = 0
-            n_columna += 1
             lista_errores.append(Errores(char, n_linea, n_columna,None))
+            n_columna += 1
+    
 
     return lista_lexemas
 
@@ -266,6 +268,8 @@ def armar_dato_json(cadena):
 
 
 def asignarToken():
+
+
     lista_solo_lexemas = []
 
     # lista de solo los lexemas, sin columna ni nada
@@ -273,81 +277,32 @@ def asignarToken():
         lista_solo_lexemas.append(lista_lexemas[i].operar(None))
 
 
-    # Recorrer la lista para guardar los tokens
+    for i, lexema in enumerate(lista_solo_lexemas):
+        
+        # se se asignan a las palabras reservadas los tokens correspondientes
+        if lexema in reserved.values():
+           lista_lexemas[i].setToken(list(reserved.keys())[list(reserved.values()).index(lista_solo_lexemas[i])])
 
-    print("Tamaño de la lista al INICIO===>",len(lista_solo_lexemas))
-    i = 0
-    while i < len(lista_solo_lexemas):
-        if lista_solo_lexemas[i] in reserved.values():
-            # Se obtiene la clave del valor que se encontro en el diccionario y se guarda en tpken
-            token = list(reserved.keys())[list(reserved.values()).index(lista_solo_lexemas[i])]
-            print("Lexema: ", lista_solo_lexemas[i]," | ", "Token: ", token)
-            lista_solo_lexemas.remove(lista_solo_lexemas[i])
-        else:
-            i += 1
-            print(f"El valor '{lista_solo_lexemas[i-1]}' no está en el diccionario.")
-    print("Tamaño de la lista===>",len(lista_solo_lexemas))
+        # se asigna el token "Argumento" a los lexemas que empiezan y terminan con comillas, porque se supone que siempre van a venir con ellas
+        elif lista_solo_lexemas[i][0] == '“' and lista_solo_lexemas[i][-1] == '”':  
+            lista_lexemas[i].setToken("Argumento")
 
-    print(" ")
-    print("============ Round 2 ============")
+        # se asigna el token "Parte_json" a los lexemas que empiezan y terminan con comillas de JSon, porque se supone que siempre van a venir con ellas
+        elif lista_solo_lexemas[i][0] == '"' and lista_solo_lexemas[i][-1] == '"':  
+            lista_lexemas[i].setToken("Parte_json")
 
-    # Guardar como tokens los argumentos, se supone que siempre van a venir con las comillas
-    i = 0
-    while i < len(lista_solo_lexemas):
-        if lista_solo_lexemas[i][0] == '“' and lista_solo_lexemas[i][-1] == '”':  
+        elif lista_solo_lexemas[i][0].isalpha()==True and lista_solo_lexemas[i][-1].isalpha()==True:
+            lista_lexemas[i].setToken("Identificador")
 
-            print("Lexema: ", lista_solo_lexemas[i]," | ", "Token: ", "Argumento")
-            lista_solo_lexemas.remove(lista_solo_lexemas[i])
-        else:
-            i += 1
-            print(f"El valor '{lista_solo_lexemas[i-1]}' no está en el diccionario.")
-
-    print("Tamaño de la lista===>",len(lista_solo_lexemas))
-
-    print(" ")
-    print("============ Round 3 ============")
-
-    # Guardar Como tokens los valores del Json, se supone que siempre van a venir con las comillas
-    i = 0
-    while i < len(lista_solo_lexemas):
-        if lista_solo_lexemas[i][0] == '"' and lista_solo_lexemas[i][-1] == '"':  
-
-            print("Lexema: ", lista_solo_lexemas[i]," | ", "Token: ", "Parte_json")
-            lista_solo_lexemas.remove(lista_solo_lexemas[i])
-        else:
-            i += 1
-            print(f"El valor '{lista_solo_lexemas[i-1]}' no está en el diccionario.")
-
-    print("Tamaño de la lista===>",len(lista_solo_lexemas))
+        # === Este else es para los errores que ocurren cuando las palabras reservadas tienen un caracter que no es valido, pero creo que ese es un error sintectico por lo cual lo dejo de momento comentado ===
+        # else:
+        #     lista_errores.append(Errores(lexema, n_linea, n_columna,None))
 
 
-    print(" ")
-    print("============ Round FINAL ============")
-
-    # Guardar Como tokens los valores del Json, se supone que siempre van a venir con las comillas
-    i = 0
-    while i < len(lista_solo_lexemas):
-        # Se supone que esa llave del Json no viene, por eso la ignoro
-        if lista_solo_lexemas[i]!= '“' :  
-            print("Lexema: ", lista_solo_lexemas[i]," | ", "Token: ", "Parte_json")
-            lista_solo_lexemas.remove(lista_solo_lexemas[i])
-        else:
-            i += 1
-            print(f"El valor '{lista_solo_lexemas[i-1]}' no está en el diccionario.")
-
-    print("Tamaño de la lista===>",len(lista_solo_lexemas))
 
 
 
     
-
-    # Los valores restantes de lista_solo_lexemas deberian de ser identificadores
-
-
-    
-
-
-# === Es una prueba, aun esta muy verde===
 
 def TablaTokens():
 
@@ -366,22 +321,49 @@ CrearBD ejemplo = nueva CrearBD(“Data”);
 
 EliminarBD elimina = nueva EliminarBD(“Data”); 
 
+CrearColeccion colec = nueva CrearColeccion(“NombreColeccion”);
+
+EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreColeccion”); 
+
 InsertarUnico insertadoc = nueva InsertarUnico(“NombreColeccion” ,
-“
+{
 { 
  "nombre" : "Obra Literaria", 
  "autor" : "Jorge Luis" 
  } 
-”);
+});
 
+ActualizarUnico actualizadoc = nueva ActualizarUnico(“NombreColeccion”, 
+{
+    { 
+    "nombre" : "Obra Literaria" 
+    }, 
+    { 
+    $set: {"autor" : "Mario Vargas"} 
+    } 
+});
+
+EliminarUnico eliminadoc = nueva EliminarUnico(“NombreColeccion”,
+{
+    { 
+    "nombre" : "Obra Literaria" 
+    } 
+});
+
+BuscarTodo todo = nueva BuscarTodo (“NombreColeccion”); *
+
+BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”); 
+@
 '''
 
 instruccion(entrada)
 
 asignarToken()
 
-# TablaTokens()
+TablaTokens()
 
-# print("==== ERRORES ====")
-# for error in lista_errores:
-#     print("ERROR: ", error.operar(None))
+
+print(" ")
+print("==== ERRORES ====")
+for error in lista_errores:
+    print("ERROR: ", error.operar(None))
