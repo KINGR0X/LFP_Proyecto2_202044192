@@ -8,15 +8,13 @@ class Errores(Expression):
         super().__init__(fila, columna, token)
 
     def operar(self, no):
-        no_ = f'\t\t"No.":{no}\n'
-        desc = '\t\t"Descripcion-Token":{\n'
-        lex = f'\t\t\t"Lexema": {self.lexema}\n'
-        tipo = '\t\t\t"Tipo": Error\n'
-        columna = f'\t\t\t"Columna": {self.columna}\n'
-        fila = f'\t\t\t"Fila": {self.fila}\n'
-        fin = "\t\t}\n"
+        tipo = 'Tipo: Error Lexico\n'
+        fila = f'Fila: {self.fila}\n'
+        columna = f'Columna: {self.columna}\n'
+        lex = f'Lexema: {self.lexema}\n'
+        desc = f'Descripcion: Error Lexico, no se reconoce el lexema\n'
 
-        return '\t{\n' + no_ + desc + lex + tipo + columna + fila + fin + '\t}'
+        return '\n' + tipo + fila + columna + lex + desc
 
     def getColumna(self):
         return super().getColumna()

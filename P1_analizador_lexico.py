@@ -3,7 +3,7 @@ from Instrucciones.aritmeticas import *
 from Instrucciones.trigonometricas import *
 from Abstract.lexema import *
 from Abstract.numero import *
-from Errores.errores import *
+from Errores.erroresLex import *
 import os
 import webbrowser
 
