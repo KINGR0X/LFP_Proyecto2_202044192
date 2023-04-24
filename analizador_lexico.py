@@ -305,30 +305,37 @@ def analizador_sintactico(tokens):
 
     estado=0
 
-    for i in range(len(tokens)):
-            
-            if estado==0:
+    for i in range(len(tokens)):    
 
-                
+            if estado==0:                
                     
-                if tokens[i].getToken() == 'Funcion_CrearBD':
+                if tokens[i].getToken() == 'Funcion_CrearBD' or tokens[i].getToken() == 'Funcion_EliminarBD':
+
                     estado=1
-                    print("Funcion_CrearBD")
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Funcion"))
+
                     continue
                 else:
                     if verificarTokenN(tokens[i]) == True:
                         estado=1
-                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Funcion_CrearBD"))
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Funcion"))
                         continue
                     else:
                         estado=1
-                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Funcion_CrearBD"))
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Funcion"))
                     
 
             if estado==1:
                 if tokens[i].getToken() == 'Identificador':
+
                     estado=2
-                    print("Identificador")
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Identificador"))
+
                     continue
                 else:
                     if verificarTokenN(tokens[i]) == True:
@@ -342,8 +349,13 @@ def analizador_sintactico(tokens):
 
             if estado==2:
                 if tokens[i].getToken() == 'Igual':
+
                     estado=3
-                    print("Igual")
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Igual"))
+
                     continue
                 else:
                     if verificarTokenN(tokens[i]) == True:
@@ -357,8 +369,13 @@ def analizador_sintactico(tokens):
 
             if estado==3:
                 if tokens[i].getToken() == 'Reservada_nueva':
+
                     estado=4
-                    print("Reservada_nueva")
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Reservada_nueva"))
+
                     continue
                 else:
                     if verificarTokenN(tokens[i]) == True:
@@ -371,24 +388,33 @@ def analizador_sintactico(tokens):
                     
 
             if estado==4:
-                if tokens[i].getToken() == 'Funcion_CrearBD':
+                if tokens[i].getToken() == 'Funcion_CrearBD' or tokens[i].getToken() == 'Funcion_EliminarBD':
+
                     estado=5
-                    print("Funcion_CrearBD")
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Funcion"))
+
                     continue
                 else:
                     if verificarTokenN(tokens[i]) == True:
                         estado=5
-                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Funcion_CrearBD"))
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Funcion"))
                         continue
                     else:
                         estado=5
-                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Funcion_CrearBD"))
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Funcion"))
                     
             
             if estado==5:
                 if tokens[i].getToken() == 'Parentesis_izquierdo':
+
                     estado=6
-                    print("Parentesis_izquierdo")
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Parentesis_izquierdo"))
+
                     continue
                 else:
                     if verificarTokenN(tokens[i]) == True:
@@ -401,9 +427,15 @@ def analizador_sintactico(tokens):
                     
             
             if estado==6:
+        
                 if tokens[i].getToken() == 'Argumento':
+
                     estado=7
-                    print("Argumento")
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Argumento"))
+
                     continue
                 else:
                     if verificarTokenN(tokens[i]) == True:
@@ -416,15 +448,16 @@ def analizador_sintactico(tokens):
                     
             
             if estado==7:
+
                 if tokens[i].getToken() == 'Parentesis_derecho':
+
                     estado=8
-                    print("Parentesis_derecho")
-                    # esta linea verifica que al finalizar la linea este el punto y coma, se usa en el caso especial de que sea la ultima lena del codigo
-                    if i == len(lista_lexemas) - 1:
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"PuntoComa"))
-                        continue
-                    else:
-                        continue
+
+                    continue
 
                 else:
                     if verificarTokenN(tokens[i]) == True:
@@ -432,22 +465,27 @@ def analizador_sintactico(tokens):
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Parentesis_derecho"))
                         continue
                     else:
-                        estado=7
-                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Argumento"))
+                        estado=8
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Parentesis_derecho")) 
                     
 
 
             if estado==8:
+
                 if tokens[i].getToken() == 'PuntoComa':
                     estado=9
-                    print("PuntoComa")
                     continue
                 else:
+                    estado=9
                     lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"PuntoComa"))
+
+            if estado==9:
+                analizador_sintactico(tokens[i:])
+                break
                     
             
 
-#Se verifica si el Token es NONE
+#Se verifica si el Token es NONE, si es None es porque el lexema tiene algun error sintactico
 def verificarTokenN(token):
     if token.getToken() == None:
         return True
@@ -512,8 +550,9 @@ def TablaTokens():
 # '''
 
 entrada= '''
+ CrearBD ejemplo = nueva CrearBD(“Data”;
 
- CrearBD ejemplo = nueva CrearBD(“Data”);
+ EliminarBD elimina = nueva EliminarBD(“Data”)
 
 '''
 
@@ -521,9 +560,11 @@ instruccion(entrada)
 
 asignarToken()
 
-#TablaTokens()
+
 
 analizador_sintactico(lista_lexemas)
+
+#TablaTokens()
 
 
 print(" ")
