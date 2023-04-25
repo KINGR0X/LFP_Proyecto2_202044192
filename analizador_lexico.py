@@ -309,7 +309,7 @@ def analizador_sintactico(tokens):
 
             if estado==0:                
                     
-                if tokens[i].getToken() == 'Funcion_CrearBD' or tokens[i].getToken() == 'Funcion_EliminarBD':
+                if tokens[i].getToken() == 'Funcion_CrearBD' or tokens[i].getToken() == 'Funcion_EliminarBD' or tokens[i].getToken() == 'Funcion_CrearColeccion' or tokens[i].getToken() =='Funcion_EliminarColeccion' or tokens[i].getToken() =='Funcion_BuscarTodo' or tokens[i].getToken() =='Funcion_BuscarUnico':
 
                     estado=1
 
@@ -388,7 +388,11 @@ def analizador_sintactico(tokens):
                     
 
             if estado==4:
-                if tokens[i].getToken() == 'Funcion_CrearBD' or tokens[i].getToken() == 'Funcion_EliminarBD':
+                if tokens[i].getToken() == 'Funcion_CrearBD' or tokens[i].getToken() == 'Funcion_EliminarBD' or tokens[i].getToken() == 'Funcion_CrearColeccion' or tokens[i].getToken() =='Funcion_EliminarColeccion' or tokens[i].getToken() =='Funcion_BuscarTodo' or tokens[i].getToken() =='Funcion_BuscarUnico':
+
+                    # Se comprueba que la funcion de la izquierda sea igual a la de la derecha
+                    if tokens[i-4].getToken() != tokens[i].getToken():
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Las Funciones no coinciden"))
 
                     estado=5
                     # si se llego al ultimo token, significa que faltan tokens a la derecha
@@ -477,7 +481,8 @@ def analizador_sintactico(tokens):
                     continue
                 else:
                     estado=9
-                    lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"PuntoComa"))
+                    # se le resta uno a i, para que se imprima la fila correcta 
+                    lista_errores.append(ErrorSintac(tokens[i-1].operar(None),tokens[i-1].getFila(), tokens[i-1].getColumna(),"PuntoComa"))
 
             if estado==9:
                 analizador_sintactico(tokens[i:])
@@ -514,8 +519,6 @@ def TablaTokens():
 
 # EliminarBD elimina = nueva EliminarBD(“Data”); 
 
-# CrearColeccion colec = nueva CrearColeccion(“NombreColeccion”);
-
 # EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreColeccion”); 
 
 # InsertarUnico insertadoc = nueva InsertarUnico(“NombreColeccion” ,
@@ -543,16 +546,24 @@ def TablaTokens():
 #     } 
 # });
 
-# BuscarTodo todo = nueva BuscarTodo (“NombreColeccion”); *
+# BuscarTodo todo = nueva BuscarTodo (“NombreColeccion”); 
 
 # BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”); 
 # @
 # '''
 
 entrada= '''
- CrearBD ejemplo = nueva CrearBD(“Data”;
+ CrearBD ejemplo = nueva CrearBD(“Data”);
 
- EliminarBD elimina = nueva EliminarBD(“Data”)
+ EliminarBD elimina = nueva EliminarBD(“Data”);
+
+ CrearColeccion colec = nueva CrearColeccion(“NombreColeccion”);
+
+ EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreColeccion”);
+
+ BuscarTodo todo = nueva BuscarTodo (“NombreColeccion”); 
+
+ BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”);  
 
 '''
 
