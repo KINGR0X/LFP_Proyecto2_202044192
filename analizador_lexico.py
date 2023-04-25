@@ -33,11 +33,13 @@ global n_columna
 global lista_lexemas
 global lista_errores
 global lista_tokens
+global needJson
 
 n_linea = 1
 n_columna = 1
 lista_lexemas = []
 lista_errores = []
+needJson=False
 
 
 lista_tokens=[]
@@ -162,7 +164,7 @@ def instruccion(cadena):
             puntero = 0
 
         elif char == ")":
-           # Armado de lexema como clase
+            # Armado de lexema como clase
             c = Lexema(char, n_linea, n_columna,None)
 
             n_columna += 1
@@ -303,13 +305,15 @@ def asignarToken():
 
 def analizador_sintactico(tokens):
 
+    global needJson
+
     estado=0
 
     for i in range(len(tokens)):    
 
             if estado==0:                
                     
-                if tokens[i].getToken() == 'Funcion_CrearBD' or tokens[i].getToken() == 'Funcion_EliminarBD' or tokens[i].getToken() == 'Funcion_CrearColeccion' or tokens[i].getToken() =='Funcion_EliminarColeccion' or tokens[i].getToken() =='Funcion_BuscarTodo' or tokens[i].getToken() =='Funcion_BuscarUnico':
+                if tokens[i].getToken() == 'Funcion_CrearBD' or tokens[i].getToken() == 'Funcion_EliminarBD' or tokens[i].getToken() == 'Funcion_CrearColeccion' or tokens[i].getToken() =='Funcion_EliminarColeccion' or tokens[i].getToken() =='Funcion_BuscarTodo' or tokens[i].getToken() =='Funcion_BuscarUnico' or tokens[i].getToken() =='Funcion_insertarUnico' or tokens[i].getToken() =='Funcion_ActualizarUnico' or tokens[i].getToken() == 'Funcion_EliminarUnico':
 
                     estado=1
 
@@ -388,7 +392,12 @@ def analizador_sintactico(tokens):
                     
 
             if estado==4:
-                if tokens[i].getToken() == 'Funcion_CrearBD' or tokens[i].getToken() == 'Funcion_EliminarBD' or tokens[i].getToken() == 'Funcion_CrearColeccion' or tokens[i].getToken() =='Funcion_EliminarColeccion' or tokens[i].getToken() =='Funcion_BuscarTodo' or tokens[i].getToken() =='Funcion_BuscarUnico':
+
+                # se comprueba que la funcion sea insertarUnico, ActualizarUnico o EliminarUnico, ya que estas funciones necesitan una coma
+                if tokens[i].getToken() =='Funcion_insertarUnico' or tokens[i].getToken() =='Funcion_ActualizarUnico' or tokens[i].getToken() == 'Funcion_EliminarUnico':
+                        needJson = True
+                
+                if tokens[i].getToken() == 'Funcion_CrearBD' or tokens[i].getToken() == 'Funcion_EliminarBD' or tokens[i].getToken() == 'Funcion_CrearColeccion' or tokens[i].getToken() =='Funcion_EliminarColeccion' or tokens[i].getToken() =='Funcion_BuscarTodo' or tokens[i].getToken() =='Funcion_BuscarUnico' or tokens[i].getToken() =='Funcion_insertarUnico' or tokens[i].getToken() =='Funcion_ActualizarUnico' or tokens[i].getToken() == 'Funcion_EliminarUnico':
 
                     # Se comprueba que la funcion de la izquierda sea igual a la de la derecha
                     if tokens[i-4].getToken() != tokens[i].getToken():
@@ -431,8 +440,18 @@ def analizador_sintactico(tokens):
                     
             
             if estado==6:
+
+                if tokens[i].getToken() == 'Argumento' and needJson== True:
+                    needJson=False
+                    estado=6.5
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Argumento"))
+
+                    continue
         
-                if tokens[i].getToken() == 'Argumento':
+                elif tokens[i].getToken() == 'Argumento':
 
                     estado=7
 
@@ -449,6 +468,31 @@ def analizador_sintactico(tokens):
                     else:
                         estado=7
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Argumento"))
+
+
+            if estado==6.5:
+                needJson==False
+
+                if tokens[i].getToken() == 'Coma':
+
+                    estado=7
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de coma"))
+
+                    continue
+
+                else:
+                    if verificarTokenN(tokens[i]) == True:
+                        estado=7
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Coma"))
+                        continue
+                    else:
+                        estado=7
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Coma")) 
+
+
                     
             
             if estado==7:
@@ -552,20 +596,24 @@ def TablaTokens():
 # @
 # '''
 
-entrada= '''
- CrearBD ejemplo = nueva CrearBD(“Data”);
 
- EliminarBD elimina = nueva EliminarBD(“Data”);
 
- CrearColeccion colec = nueva CrearColeccion(“NombreColeccion”);
+entrada = '''
 
- EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreColeccion”);
+CrearBD ejemplo = nueva CrearBD(“Data”); 
 
- BuscarTodo todo = nueva BuscarTodo (“NombreColeccion”); 
+EliminarBD elimina = nueva EliminarBD(“Data”); 
 
- BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”);  
+EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreColeccion”); 
+
+InsertarUnico insertadoc = nueva InsertarUnico (“NombreColeccion” );
+
+BuscarTodo todo = nueva BuscarTodo (“NombreColeccion”); 
+
+BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”); 
 
 '''
+
 
 instruccion(entrada)
 
