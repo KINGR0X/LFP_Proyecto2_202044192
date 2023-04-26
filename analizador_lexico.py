@@ -475,7 +475,7 @@ def analizador_sintactico(tokens):
 
                 if tokens[i].getToken() == 'Coma':
 
-                    estado=7
+                    estado=6.9
 
                     # si se llego al ultimo token, significa que faltan tokens a la derecha
                     if i == len(tokens) - 1:
@@ -485,15 +485,221 @@ def analizador_sintactico(tokens):
 
                 else:
                     if verificarTokenN(tokens[i]) == True:
-                        estado=7
+                        estado=6.9
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Coma"))
                         continue
                     else:
-                        estado=7
+                        estado=6.9
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Coma")) 
 
 
+            if estado==6.9:
+                estado='Llave_izquierda_1'
+
+
+            # === Inicio de Json ===
+
+            if estado=='Llave_izquierda_1':                
                     
+                if tokens[i].getToken() == 'Llave_izquierda':
+
+                    estado='Llave_izquierda_2'
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Llave_izquierda"))
+
+                    continue
+
+                else:
+            
+                    if verificarTokenN(tokens[i]) == True:
+                        estado='Llave_izquierda_2'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_izquierda"))
+                        continue
+                    else:
+                        estado='Llave_izquierda_2'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_izquierda")) 
+
+
+            if estado=='Llave_izquierda_2':                
+                    
+                if tokens[i].getToken() == 'Llave_izquierda':
+
+                    estado='Parte_json_1'
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Llave_izquierda"))
+
+                    continue
+
+                else:
+                    if verificarTokenN(tokens[i]) == True:
+                        estado='Parte_json_1'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_izquierda"))
+                        continue
+                    else:
+                        estado='Parte_json_1'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_izquierda")) 
+
+            if estado=='Parte_json_1':
+
+                if tokens[i].getToken() == 'Parte_json':
+                        
+                    estado='DosPuntos'
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de parte Json"))
+
+                    continue
+                else:
+
+                    if verificarTokenN(tokens[i]) == True:
+                        estado='DosPuntos'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Parte_json"))
+                        continue
+                    else:
+                        estado='DosPuntos'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Parte_json"))
+
+
+
+            if estado=='DosPuntos':
+                if tokens[i].getToken() == 'DosPuntos':
+                    # como siempre lleva comillas el token de key y valor se llaman igual, entonces regresa al estado de Parte_json
+                    estado='Parte_json_2'
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de DosPuntos"))
+
+                    continue
+                else:
+                    if verificarTokenN(tokens[i]) == True:
+                        estado='Parte_json_2'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"DosPuntos"))
+                        continue
+                    else:
+                        estado='Parte_json_2'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"DosPuntos"))
+
+
+            if estado=='Parte_json_2':
+
+                if tokens[i].getToken() == 'Parte_json':
+
+                    if (tokens[i+1].getToken() == 'Coma' and tokens[i+2].getToken() == 'Parte_json') or tokens[i+1].getToken() == 'Parte_json':
+                        estado= 'Coma'
+                    elif tokens[i+1].getToken() == 'Llave_izquierda':
+                        estado='Llave_derecha_1'
+                    elif tokens[i+1].getToken() == 'Coma':
+                        estado='Llave_derecha_1'
+                    else:
+                        estado='Llave_derecha_1'
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de parte Json"))
+
+                    continue
+                else:
+
+                    if verificarTokenN(tokens[i]) == True:
+                        estado='Llave_derecha_1'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Parte_json"))
+                        continue
+                    else:
+                        estado='Llave_derecha_1'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Parte_json"))
+
+            
+            if estado=='Coma':                 
+                    
+                if tokens[i].getToken() == 'Coma':
+
+                    if tokens[i+1].getToken() == 'Llave_izquierda':
+                        estado='Llave_izquierda_2' 
+                    # si falta la llave del siguiente Json 
+                    elif tokens[i-1].getToken() == 'Llave_derecha':
+                        estado='Llave_izquierda_2'
+                    else:     
+                        estado='Parte_json_1'
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Coma"))
+
+                    continue
+
+                else:
+            
+                    if verificarTokenN(tokens[i]) == True:
+                        estado='Parte_json_1'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Coma"))
+                        continue
+                    else:
+                        estado='Parte_json_1'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Coma")) 
+           
+            # llaves derechas dentro del Json
+            if estado=='Llave_derecha_1':                
+                    
+                if tokens[i].getToken() == 'Llave_derecha':   
+
+                    if tokens[i+1].getToken() == 'Coma':
+                        estado= 'Coma'
+                    elif tokens[i+1].getToken() == 'Llave_izquierda':
+                        estado= 'Coma'
+                    else:
+                        estado='Llave_derecha_2'
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Llave_derecha"))
+
+                    continue
+
+                else:
+            
+                    if verificarTokenN(tokens[i]) == True:
+                        estado='Llave_derecha_2'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_derecha"))
+                        continue
+                    elif tokens[i].getToken() == 'Coma' or tokens[i].getToken() == 'Llave_izquierda':
+                        estado='Coma'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_derecha"))
+                        continue
+                    else:
+                        estado='Llave_derecha_2'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_derecha")) 
+
+
+            if estado=='Llave_derecha_2':   
+   
+                if tokens[i].getToken() == 'Llave_derecha':
+                        
+                    estado=7
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de Llave_derecha"))
+
+                    continue
+
+                else:
+            
+                    if verificarTokenN(tokens[i]) == True:
+                        estado=7
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_derecha"))
+                        continue
+                    else:
+                        estado=7
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_derecha")) 
+
+            # === Fin de Json ===
+
             
             if estado==7:
 
@@ -540,11 +746,10 @@ def verificarTokenN(token):
         return True
     else:
         return False
-
-
-
-
     
+
+# armar JSON, creé un metodo especifico para eso porque si no se me hacia muy largo el codigo
+
 
 def TablaTokens():
 
@@ -556,6 +761,7 @@ def TablaTokens():
         print("Token ==>", lista_lexemas[i].getToken())
         print("Fila ==>", lista_lexemas[i].getFila())
         print("Columna ==>", lista_lexemas[i].getColumna())
+
 
 # entrada = '''
 
@@ -599,20 +805,20 @@ def TablaTokens():
 
 
 entrada = '''
+InsertarUnico insertadoc = nueva InsertarUnico (“NombreColeccion”, 
+{
+    { 
+     "nombre" : "Obra Literaria"
+    },
+    {
+     "nombre" : "Obra Literaria"
+    }
 
-CrearBD ejemplo = nueva CrearBD(“Data”); 
-
-EliminarBD elimina = nueva EliminarBD(“Data”); 
-
-EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreColeccion”); 
-
-InsertarUnico insertadoc = nueva InsertarUnico (“NombreColeccion” );
-
-BuscarTodo todo = nueva BuscarTodo (“NombreColeccion”); 
-
-BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”); 
+});
 
 '''
+
+
 
 
 instruccion(entrada)
@@ -622,6 +828,7 @@ asignarToken()
 
 
 analizador_sintactico(lista_lexemas)
+
 
 #TablaTokens()
 
