@@ -24,7 +24,7 @@ reserved = {
     "Coma": ",",
     "Llave_izquierda": "{",
     "Llave_derecha": "}",
-    "Funcion_$set": "$set:"
+    "Funcion_$set": "$set"
     # NOTA: las comillas no son Tokens
 }
 
@@ -217,7 +217,7 @@ def armar_lexema(cadena):
     for char in cadena:
         puntero += char
         # Coloque las comillas en caso de que falte el parentesis 
-        if char == ' '  or char == "(" or char == '“' or char=='"':
+        if char == ' '  or char == "(" or char == '“' or char=='"' or char==':':
             # en cadena el slicing devuelce desde uno antes del puntero hasta el final
             return lexema, cadena[len(puntero)-1:]
         else:
@@ -307,6 +307,7 @@ def analizador_sintactico(tokens):
 
     global needJson
 
+    isSet= False
     estado=0
 
     for i in range(len(tokens)):    
@@ -521,12 +522,15 @@ def analizador_sintactico(tokens):
                         estado='Llave_izquierda_2'
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_izquierda")) 
 
-
+            # llave izquierda que va dentro del Json
             if estado=='Llave_izquierda_2':                
                     
                 if tokens[i].getToken() == 'Llave_izquierda':
 
-                    estado='Parte_json_1'
+                    if tokens[i+1].getToken() == 'Funcion_$set' or tokens[i+1].getToken() == 'DosPuntos' or tokens[i+1].getToken() == 'Llave_izquierda':
+                        estado= 'Funcion_$set'
+                    else:
+                        estado='Parte_json_1'
 
                     # si se llego al ultimo token, significa que faltan tokens a la derecha
                     if i == len(tokens) - 1:
@@ -537,6 +541,10 @@ def analizador_sintactico(tokens):
                 else:
                     if verificarTokenN(tokens[i]) == True:
                         estado='Parte_json_1'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_izquierda"))
+                        continue
+                    elif tokens[i].getToken() == 'Funcion_$set':
+                        estado='Funcion_$set'
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Llave_izquierda"))
                         continue
                     else:
@@ -564,12 +572,39 @@ def analizador_sintactico(tokens):
                         estado='DosPuntos'
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Parte_json"))
 
+            if estado=='Funcion_$set':
+                isSet= True
+
+                if tokens[i].getToken() == 'Funcion_$set':
+                    
+                        
+                    estado='DosPuntos'
+
+                    # si se llego al ultimo token, significa que faltan tokens a la derecha
+                    if i == len(tokens) - 1:
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"a la derecha de $set"))
+
+                    continue
+                else:
+
+                    if verificarTokenN(tokens[i]) == True:
+                        estado='DosPuntos'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"$set"))
+                        continue
+                    else:
+                        estado='DosPuntos'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"$set"))
+
 
 
             if estado=='DosPuntos':
                 if tokens[i].getToken() == 'DosPuntos':
                     # como siempre lleva comillas el token de key y valor se llaman igual, entonces regresa al estado de Parte_json
-                    estado='Parte_json_2'
+
+                    if tokens[i-1].getToken() == 'Funcion_$set':
+                        estado='Llave_izquierda_2'
+                    else:
+                        estado='Parte_json_2'
 
                     # si se llego al ultimo token, significa que faltan tokens a la derecha
                     if i == len(tokens) - 1:
@@ -581,12 +616,16 @@ def analizador_sintactico(tokens):
                         estado='Parte_json_2'
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"DosPuntos"))
                         continue
+                    elif tokens[i-1].getToken() == 'Funcion_$set':
+                        estado='Llave_izquierda_2'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"DosPuntos"))
+                        continue
                     else:
                         estado='Parte_json_2'
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"DosPuntos"))
 
 
-            if estado=='Parte_json_2':
+            if estado=='Parte_json_2': 
 
                 if tokens[i].getToken() == 'Parte_json':
 
@@ -639,6 +678,10 @@ def analizador_sintactico(tokens):
                         estado='Parte_json_1'
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Coma"))
                         continue
+                    elif tokens[i].getToken() == 'Llave_izquierda':
+                        estado='Llave_izquierda_2'
+                        lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Coma"))
+                        continue
                     else:
                         estado='Parte_json_1'
                         lista_errores.append(ErrorSintac(tokens[i].operar(None),tokens[i].getFila(), tokens[i].getColumna(),"Coma")) 
@@ -652,6 +695,10 @@ def analizador_sintactico(tokens):
                         estado= 'Coma'
                     elif tokens[i+1].getToken() == 'Llave_izquierda':
                         estado= 'Coma'
+                    # este es en caso del $set, ya que tiene que ahce que queden dos llaves derechas juntas
+                    elif isSet == True:
+                        estado='Llave_derecha_1'
+                        isSet = False
                     else:
                         estado='Llave_derecha_2'
 
@@ -763,60 +810,44 @@ def TablaTokens():
         print("Columna ==>", lista_lexemas[i].getColumna())
 
 
-# entrada = '''
-
-# CrearBD ejemplo = nueva CrearBD(“Data”); 
-
-# EliminarBD elimina = nueva EliminarBD(“Data”); 
-
-# EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreColeccion”); 
-
-# InsertarUnico insertadoc = nueva InsertarUnico(“NombreColeccion” ,
-# {
-# { 
-#  "nombre" : "Obra Literaria", 
-#  "autor" : "Jorge Luis" 
-#  } 
-# });
-
-# ActualizarUnico actualizadoc = nueva ActualizarUnico(“NombreColeccion”, 
-# {
-#     { 
-#     "nombre" : "Obra Literaria" 
-#     }, 
-#     { 
-#     $set: {"autor" : "Mario Vargas"} 
-#     } 
-# });
-
-# EliminarUnico eliminadoc = nueva EliminarUnico(“NombreColeccion”,
-# {
-#     { 
-#     "nombre" : "Obra Literaria" 
-#     } 
-# });
-
-# BuscarTodo todo = nueva BuscarTodo (“NombreColeccion”); 
-
-# BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”); 
-# @
-# '''
-
-
-
 entrada = '''
-InsertarUnico insertadoc = nueva InsertarUnico (“NombreColeccion”, 
+CrearBD ejemplo = nueva CrearBD(“Data”); 
+
+EliminarBD elimina = nueva EliminarBD(“Data”); 
+
+EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreColeccion”); 
+
+InsertarUnico insertadoc = nueva InsertarUnico(“NombreColeccion” ,
 {
     { 
-     "nombre" : "Obra Literaria"
-    },
-    {
-     "nombre" : "Obra Literaria"
-    }
-
+        "nombre" : "Obra Literaria", 
+        "autor" : "Jorge Luis" 
+    } 
 });
 
+ActualizarUnico actualizadoc = nueva ActualizarUnico(“NombreColeccion”, 
+{
+    { 
+    "nombre" : "Obra Literaria" 
+    }, 
+    { 
+    $set: {"autor" : "Mario Vargas"} 
+    } 
+});
+
+EliminarUnico eliminadoc = nueva EliminarUnico(“NombreColeccion”,
+{
+    { 
+    "nombre" : "Obra Literaria" 
+    } 
+});
+
+BuscarTodo todo = nueva BuscarTodo (“NombreColeccion”); 
+
+BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”); 
+
 '''
+
 
 
 
