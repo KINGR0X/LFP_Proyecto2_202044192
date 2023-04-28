@@ -7,7 +7,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkinter import scrolledtext
 from tkinter.filedialog import asksaveasfilename
-from analizador_lexico import instruccion
+from analizador_lexico import *
 import os
 
 
@@ -15,7 +15,7 @@ class Pantalla_principal():
 
     def __init__(self):
         self.pp = Tk()
-        self.pp.title("Pantalla Principal | Proyecto 1")
+        self.pp.title("Pantalla Principal | Proyecto 2")
         self.centrar(self.pp, 1000, 800)
         self.pp.configure(bg="#343541")
         self.pantalla_1()
@@ -146,15 +146,6 @@ class Pantalla_principal():
         # Actualizacion del Frame
         self.Frame.mainloop()
 
-    def analizar(self):
-        messagebox.showinfo("Analizar", "Boton de Analizar presionado")
-
-    def tokens(self):
-        messagebox.showinfo("Tokens", "Boton de Tokens presionado")
-
-    def errores(self):
-        messagebox.showinfo("Errores", "Boton de Errores presionado")
-
     def nuevo(self):
 
         try:
@@ -278,26 +269,75 @@ class Pantalla_principal():
         #         "Error", "No se ha podido generar el archivo de errores")
         #     return
 
-    def ejecutar(self):
+    def analizar(self):
         # variable para saber si ya se presiono el boton de analizar
         self.analizado = True
         # En caso de que despues de analizar un arhivo se analice otro se limpian las listas
         # limpiarListaErrores()
         # limpiarLista()
-        # try:
-        #     instruccion(self.texto)
-        #     lexemas_grafico()
-        #     operar_()
-        #     generarGrafica(str("RESULTADOS_202044192"))
+        try:
+            instruccion(self.texto)
+            asignarToken()
+            analizador_sintactico(lista_lexemas)
 
-        #     # set contenido
-        #     messagebox.showinfo("Analisis completado",
-        #                         "Analisis realizado con exito, archivo .dot y .pdf generados")
+            if len(lista_errores) == 0:
 
-        # except:
-        #     messagebox.showerror(
-        #         "Error", "No se ha seleccionado ningún archivo")
-        #     return
+                necesarioparaMongo(lista_lexemas)
+                transformarMongo()
+                # set contenido
+                messagebox.showinfo("Analisis completado",
+                                    "Analisis completado, No se encontraron errores")
+
+            else:
+
+                messagebox.showerror("Analisis completado",
+                                     "Analisis completado, Se encontraron algunos errores")
+
+        except:
+            messagebox.showerror(
+                "Error", "No se ha seleccionado ningún archivo")
+            return
+
+    def tokens(self):
+
+        ventana = Tk()
+        ventana.title("Tokens | Proyecto 2")
+        self.centrar(ventana, 800, 320)
+        ventana.geometry("800x320")
+        ventana.configure(bg="#343541")
+
+        tv = ttk.Treeview(ventana, columns=("col1", "col2", "col3"))
+
+        tv.column("#0", width=100)
+        tv.column("#1", width=200, anchor=CENTER)
+        tv.column("#2", width=200, anchor=CENTER)
+        tv.column("#3", width=200, anchor=CENTER)
+
+        tv.heading("#0", text="No.", anchor=CENTER)
+        tv.heading("#1", text="Token", anchor=CENTER)
+        tv.heading("#2", text="No.Token", anchor=CENTER)
+        tv.heading("#3", text="Lexema", anchor=CENTER)
+
+        # Estilos de la tabla
+        style = ttk.Style(tv)
+        style.theme_use("clam")
+
+        style.configure("Treeview", background="white",
+                        fieldbackground="white", foreground="black", font=['Times New Roman', 14, 'normal'])
+
+        style.configure('Treeview.Heading', background="orange", font=[
+                        'Times New Roman', 14, 'normal'])
+
+        for i in range(len(lista_lexemas)):
+            tv.insert("", END, text=i, values=(
+                lista_lexemas[i].getToken(), i, lista_lexemas[i].operar(None)))
+
+        tv.pack()
+
+        ventana.mainloop()
+
+    def errores(self):
+        messagebox.showinfo("Errores", "Boton de Errores presionado")
 
 
 # mostrar pantalla

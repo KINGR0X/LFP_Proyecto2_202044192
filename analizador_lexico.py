@@ -1003,33 +1003,29 @@ BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”);
 '''
 
 
-
-instruccion(entrada)
-
-asignarToken()
-
-
-
-analizador_sintactico(lista_lexemas)
+# Las 3 funciones del analizador
+# instruccion(entrada)
+# asignarToken()
+# analizador_sintactico(lista_lexemas)
 
 
 #TablaTokens()
 
 
+# def ComprobacionErrores():
+#     # Solo se traduce a Mongo si no hay errores
+#     if len(lista_errores)==0: 
+        
+#         necesarioparaMongo(lista_lexemas)
+#         print("===== Traduccion =====")
+#         transformarMongo()
 
-# Solo se traduce a Mongo si no hay errores
-if len(lista_errores)==0: 
-    
-    necesarioparaMongo(lista_lexemas)
-    print("===== Traduccion =====")
-    transformarMongo()
+#     else:
 
-else:
-
-    print(" ")
-    print("==== ERRORES ====")
-    for error in lista_errores:
-        print("ERROR: ", error.operar(None))
+#         print(" ")
+#         print("==== ERRORES ====")
+#         for error in lista_errores:
+#             print("ERROR: ", error.operar(None))
 
 
 
