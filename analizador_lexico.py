@@ -35,6 +35,7 @@ global lista_errores
 global lista_tokens
 global needJson
 global lista_mongo
+global lista_intrucciones
 
 n_linea = 1
 n_columna = 1
@@ -42,6 +43,7 @@ lista_lexemas = []
 lista_errores = []
 needJson=False
 lista_mongo= []
+lista_intrucciones=[]
 
 lista_tokens=[]
 
@@ -813,7 +815,7 @@ def unirJson(cadena):
     # para evitar que se detenga el problema en caso de un error
     return None, None
 
-def transformacionAMongo(lista):
+def necesarioparaMongo(lista):
     global lista_mongo
 
     # lista de solo los lexemas, sin columna ni nada
@@ -889,19 +891,62 @@ def transformacionAMongo(lista):
 
 
 
-    #imprimir lista de mongo
+    # #imprimir lista de mongo
+    # for i in range(len(lista_mongo)):
+    #    print(lista_mongo[i])
+
+
+def transformarMongo():
+    global lista_mongo
+    global lista_intrucciones
+
+    # lista de solo los lexemas, sin columna ni nada
     for i in range(len(lista_mongo)):
-       print(lista_mongo[i])
+        
+        
+        if lista_mongo[i]== 'CrearBD':
+            # se necesita la función y el nombre de la Base de datos
+            lista_intrucciones.append(f"use({lista_mongo[i+1]});")
 
+        if lista_mongo[i]== 'EliminarBD':
+            lista_intrucciones.append(f"db.dropDatabase();")
 
+        if lista_mongo[i]== 'CrearColeccion':
+            lista_intrucciones.append(f"db.createCollection({lista_mongo[i+1]});")
 
+        if lista_mongo[i]== 'EliminarColeccion':
+            nombreC=lista_mongo[i+1].strip('“')
+            nombreC=nombreC.strip('”')
+            lista_intrucciones.append(f"db.{nombreC}.drop();")
 
+        if lista_mongo[i]== 'InsertarUnico':
+            nombreC=lista_mongo[i+1].strip('“')
+            nombreC=nombreC.strip('”')
+            lista_intrucciones.append(f"db.{nombreC}.insertOne({lista_mongo[i+2]});")
 
+        if lista_mongo[i]== 'ActualizarUnico':
+            nombreC=lista_mongo[i+1].strip('“')
+            nombreC=nombreC.strip('”')
+            lista_intrucciones.append(f"db.{nombreC}.updateOne({lista_mongo[i+2]});")
 
+        if lista_mongo[i]== 'EliminarUnico':
+            nombreC=lista_mongo[i+1].strip('“')
+            nombreC=nombreC.strip('”')
+            lista_intrucciones.append(f"db.{nombreC}.deleteOne({lista_mongo[i+2]});")
 
+        if lista_mongo[i]== 'BuscarTodo':
+            nombreC=lista_mongo[i+1].strip('“')
+            nombreC=nombreC.strip('”')
+            lista_intrucciones.append(f"db.{nombreC}.find();")
 
+        if lista_mongo[i]== 'BuscarUnico':
+            nombreC=lista_mongo[i+1].strip('“')
+            nombreC=nombreC.strip('”')
+            lista_intrucciones.append(f"db.{nombreC}.findOne();")
 
-
+    #imprimir lista de instrucciones
+    for i in range(len(lista_intrucciones)):
+        print(lista_intrucciones[i])
 
 
 
@@ -922,9 +967,9 @@ CrearBD ejemplo = nueva CrearBD(“Data”);
 
 EliminarBD elimina = nueva EliminarBD(“Data”); 
 
-CrearColeccion colec = nueva CrearColeccion(“NombreColeccion”);
+CrearColeccion colec = nueva CrearColeccion(“NombreCrearC”);
 
-EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreColeccion”); 
+EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreEliminarC”); 
 
 InsertarUnico insertadoc = nueva InsertarUnico(“NombreInsertar” ,
 {
@@ -959,8 +1004,6 @@ BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”);
 
 
 
-
-
 instruccion(entrada)
 
 asignarToken()
@@ -974,14 +1017,20 @@ analizador_sintactico(lista_lexemas)
 
 
 
+# Solo se traduce a Mongo si no hay errores
+if len(lista_errores)==0: 
+    
+    necesarioparaMongo(lista_lexemas)
+    print("===== Traduccion =====")
+    transformarMongo()
 
-if len(lista_errores)==0:
-    print("Sin errores")
 else:
+
     print(" ")
     print("==== ERRORES ====")
     for error in lista_errores:
         print("ERROR: ", error.operar(None))
 
 
-transformacionAMongo(lista_lexemas)
+
+
