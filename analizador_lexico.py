@@ -34,13 +34,14 @@ global lista_lexemas
 global lista_errores
 global lista_tokens
 global needJson
+global lista_mongo
 
 n_linea = 1
 n_columna = 1
 lista_lexemas = []
 lista_errores = []
 needJson=False
-
+lista_mongo= []
 
 lista_tokens=[]
 
@@ -296,10 +297,6 @@ def asignarToken():
 
         elif lista_solo_lexemas[i][0].isalpha()==True and lista_solo_lexemas[i][-1].isalpha()==True:
             lista_lexemas[i].setToken("Identificador")
-
-        # === Este else es para los errores que ocurren cuando las palabras reservadas tienen un caracter que no es valido, pero creo que ese es un error sintectico por lo cual lo dejo de momento comentado ===
-        # else:
-        #     lista_errores.append(Errores(lexema, n_linea, n_columna,None))
 
 
 
@@ -787,7 +784,7 @@ def analizador_sintactico(tokens):
                     
             
 
-#Se verifica si el Token es NONE, si es None es porque el lexema tiene algun error sintactico
+# Se verifica si el Token es NONE, si es None es porque el lexema tiene algun error sintactico
 def verificarTokenN(token):
     if token.getToken() == None:
         return True
@@ -795,7 +792,117 @@ def verificarTokenN(token):
         return False
     
 
-# armar JSON, creé un metodo especifico para eso porque si no se me hacia muy largo el codigo
+def unirJson(cadena):
+    global n_linea
+    global n_columna
+    global lista_lexemas
+    lexema = ""
+    puntero = ""
+    # se recorre toda la cadena con el puntero hasta encontrar un espacio en blanco
+    for char in cadena:
+        puntero += char.operar(None)
+
+        # Como las mismas comillas se usan para los argumentos de la funcion y para abrir el Json coloque el espacio en blanco y el salto
+        if char.operar(None) == ')':
+            # en cadena el slicing devuelce desde uno antes del puntero hasta el final
+            return lexema
+
+        else:
+            # se va agregando letra por letra al lexema
+            lexema += char.operar(None)
+    # para evitar que se detenga el problema en caso de un error
+    return None, None
+
+def transformacionAMongo(lista):
+    global lista_mongo
+
+    # lista de solo los lexemas, sin columna ni nada
+    for i in range(len(lista)):
+
+        if lista[i].operar(None)== 'CrearBD' :
+            if  lista[i+2].getToken() == 'Argumento':
+                # se necesita la función y el nombre de la Base de datos
+                lista_mongo.append(lista[i].operar(None))
+                lista_mongo.append(lista[i+2].operar(None))
+
+        if lista[i].operar(None)== 'EliminarBD' :
+            if  lista[i+2].getToken() == 'Argumento':
+                # solo se necesita la función
+                lista_mongo.append(lista[i].operar(None))
+
+        if lista[i].operar(None)== 'CrearColeccion':
+            if  lista[i+2].getToken() == 'Argumento':
+                # se necesita la función y el nombre de la Base de datos
+                lista_mongo.append(lista[i].operar(None))
+                lista_mongo.append(lista[i+2].operar(None))
+
+        if lista[i].operar(None)== 'EliminarColeccion':
+            if  lista[i+2].getToken() == 'Argumento':
+                # se necesita la función y el nombre de la Base de datos
+                lista_mongo.append(lista[i].operar(None))
+                lista_mongo.append(lista[i+2].operar(None))
+
+        if lista[i].operar(None)== 'InsertarUnico':
+            if  lista[i+2].getToken() == 'Argumento':
+                # se necesita la función y el nombre de la Base de datos
+                lista_mongo.append(lista[i].operar(None))
+                lista_mongo.append(lista[i+2].operar(None))
+
+                # Guardar el Json junto
+                if lista[i+3].getToken() == 'Coma':
+                    lista_mongo.append(unirJson(lista[i+4:]))
+
+        if lista[i].operar(None)== 'ActualizarUnico':
+            if  lista[i+2].getToken() == 'Argumento':
+                # se necesita la función y el nombre de la Base de datos
+                lista_mongo.append(lista[i].operar(None))
+                lista_mongo.append(lista[i+2].operar(None))
+
+                # Guardar el Json junto
+                if lista[i+3].getToken() == 'Coma':
+                    lista_mongo.append(unirJson(lista[i+4:]))
+
+        if lista[i].operar(None)== 'EliminarUnico':
+            if  lista[i+2].getToken() == 'Argumento':
+                # se necesita la función y el nombre de la Base de datos
+                lista_mongo.append(lista[i].operar(None))
+                lista_mongo.append(lista[i+2].operar(None))
+
+                # Guardar el Json junto
+                if lista[i+3].getToken() == 'Coma':
+                    lista_mongo.append(unirJson(lista[i+4:]))
+
+        if lista[i].operar(None)== 'BuscarTodo':
+            if  lista[i+2].getToken() == 'Argumento':
+                # se necesita la función y el nombre de la Base de datos
+                lista_mongo.append(lista[i].operar(None))
+                lista_mongo.append(lista[i+2].operar(None))
+
+        if lista[i].operar(None)== 'BuscarUnico':
+            if  lista[i+2].getToken() == 'Argumento':
+                # se necesita la función y el nombre de la Base de datos
+                lista_mongo.append(lista[i].operar(None))
+                lista_mongo.append(lista[i+2].operar(None))
+
+
+        
+
+
+
+    #imprimir lista de mongo
+    for i in range(len(lista_mongo)):
+       print(lista_mongo[i])
+
+
+
+
+
+
+
+
+
+
+
 
 
 def TablaTokens():
@@ -815,9 +922,11 @@ CrearBD ejemplo = nueva CrearBD(“Data”);
 
 EliminarBD elimina = nueva EliminarBD(“Data”); 
 
+CrearColeccion colec = nueva CrearColeccion(“NombreColeccion”);
+
 EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreColeccion”); 
 
-InsertarUnico insertadoc = nueva InsertarUnico(“NombreColeccion” ,
+InsertarUnico insertadoc = nueva InsertarUnico(“NombreInsertar” ,
 {
     { 
         "nombre" : "Obra Literaria", 
@@ -825,7 +934,7 @@ InsertarUnico insertadoc = nueva InsertarUnico(“NombreColeccion” ,
     } 
 });
 
-ActualizarUnico actualizadoc = nueva ActualizarUnico(“NombreColeccion”, 
+ActualizarUnico actualizadoc = nueva ActualizarUnico(“NombreActualizar”, 
 {
     { 
     "nombre" : "Obra Literaria" 
@@ -835,7 +944,7 @@ ActualizarUnico actualizadoc = nueva ActualizarUnico(“NombreColeccion”,
     } 
 });
 
-EliminarUnico eliminadoc = nueva EliminarUnico(“NombreColeccion”,
+EliminarUnico eliminadoc = nueva EliminarUnico(“NombreEliminarUnico”,
 {
     { 
     "nombre" : "Obra Literaria" 
@@ -864,8 +973,15 @@ analizador_sintactico(lista_lexemas)
 #TablaTokens()
 
 
-print(" ")
-print("==== ERRORES ====")
-for error in lista_errores:
-    print("ERROR: ", error.operar(None))
 
+
+if len(lista_errores)==0:
+    print("Sin errores")
+else:
+    print(" ")
+    print("==== ERRORES ====")
+    for error in lista_errores:
+        print("ERROR: ", error.operar(None))
+
+
+transformacionAMongo(lista_lexemas)
