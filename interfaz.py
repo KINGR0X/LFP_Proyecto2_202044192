@@ -7,7 +7,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkinter import scrolledtext
 from tkinter.filedialog import asksaveasfilename
-from analizador_lexico import instruccion, operar_, generarGrafica, limpiarLista,  CrearArchivoErrores, limpiarListaErrores, lexemas_grafico
+from analizador_lexico import instruccion
 import os
 
 
@@ -100,41 +100,43 @@ class Pantalla_principal():
         self.pp.config(menu=self.menubar)
 
         # cuadro de texto de entrada
-        textContainer = Frame(self.pp, borderwidth=1, relief="sunken")
+        self.textContainer = Frame(self.pp, borderwidth=1, relief="sunken")
 
-        text = Text(textContainer, font=(
+        self.text = Text(self.textContainer, font=(
             "Times New Roman", 15), fg='white', bg="#444654", width=45, height=24, wrap="none")
 
         textVsb = Scrollbar(
-            textContainer, orient="vertical", command=text.yview)
+            self.textContainer, orient="vertical", command=self.text.yview)
         textHsb = Scrollbar(
-            textContainer, orient="horizontal", command=text.xview)
-        text.configure(yscrollcommand=textVsb.set, xscrollcommand=textHsb.set)
+            self.textContainer, orient="horizontal", command=self.text.xview)
+        self.text.configure(yscrollcommand=textVsb.set,
+                            xscrollcommand=textHsb.set)
 
-        text.grid(row=0, column=0, sticky="nsew")
+        self.text.grid(row=0, column=0, sticky="nsew")
         textVsb.grid(row=0, column=1, sticky="ns")
         textHsb.grid(row=1, column=0, sticky="ew")
 
-        textContainer.grid_rowconfigure(0, weight=1)
-        textContainer.grid_columnconfigure(0, weight=1)
+        self.textContainer.grid_rowconfigure(0, weight=1)
+        self.textContainer.grid_columnconfigure(0, weight=1)
 
-        textContainer.place(x=28, y=53)
+        self.textContainer.place(x=28, y=53)
 
         # cuadro de texto de salida
         textContainerSalida = Frame(self.pp, borderwidth=1, relief="sunken")
 
-        text = Text(textContainerSalida, font=(
+        text2 = Text(textContainerSalida, font=(
             "Times New Roman", 15), fg='white', bg="#444654", width=45, height=24, wrap="none", state=DISABLED)
 
-        textVsb = Scrollbar(
-            textContainerSalida, orient="vertical", command=text.yview)
-        textHsb = Scrollbar(
-            textContainerSalida, orient="horizontal", command=text.xview)
-        text.configure(yscrollcommand=textVsb.set, xscrollcommand=textHsb.set)
+        textVsb2 = Scrollbar(
+            textContainerSalida, orient="vertical", command=text2.yview)
+        textHsb2 = Scrollbar(
+            textContainerSalida, orient="horizontal", command=text2.xview)
+        text2.configure(yscrollcommand=textVsb2.set,
+                        xscrollcommand=textHsb2.set)
 
-        text.grid(row=0, column=0, sticky="nsew")
-        textVsb.grid(row=0, column=1, sticky="ns")
-        textHsb.grid(row=1, column=0, sticky="ew")
+        text2.grid(row=0, column=0, sticky="nsew")
+        textVsb2.grid(row=0, column=1, sticky="ns")
+        textHsb2.grid(row=1, column=0, sticky="ew")
 
         textContainerSalida.grid_rowconfigure(0, weight=1)
         textContainerSalida.grid_columnconfigure(0, weight=1)
@@ -144,9 +146,6 @@ class Pantalla_principal():
         # Actualizacion del Frame
         self.Frame.mainloop()
 
-    def nuevo(self):
-        messagebox.showinfo("Nuevo", "Boton de Nuevo presionado")
-
     def analizar(self):
         messagebox.showinfo("Analizar", "Boton de Analizar presionado")
 
@@ -155,6 +154,42 @@ class Pantalla_principal():
 
     def errores(self):
         messagebox.showinfo("Errores", "Boton de Errores presionado")
+
+    def nuevo(self):
+
+        try:
+            self.texto = self.text.get(1.0, "end")
+
+            if len(self.texto) != 1:
+                # pregunta si se desea guardar el archivo
+                respuesta = messagebox.askquestion(
+                    "Guardar", "¿Desea guardar el archivo antes de crear uno nuevo?")
+
+                if respuesta == "yes":
+                    # Tomar datos que esta en el cuadro de texto
+                    self.extensions = [("Archivos txt", f".txt"),
+                                       ("Archivos lfp", f".lfp"), ("All files", "*")]
+
+                    self.archivo_seleccionado = filename = asksaveasfilename(
+                        title="Seleccione un archivo", filetypes=[("Archivos txt", f".txt"), ("Archivos lfp", f".lfp"), ("All files", "*")], defaultextension=self.extensions, initialfile="Documento")
+
+                    archivo = open(self.archivo_seleccionado,
+                                   'w', encoding="utf-8")
+                    archivo.write(self.texto)
+
+                    # mensaje de guardado
+                    messagebox.showinfo(
+                        "Guardado", "Archivo guardado con exito")
+                else:
+                    self.text.delete(1.0, "end")
+
+            else:
+                self.text.delete(1.0, "end")
+
+        except:
+            messagebox.showerror(
+                "Error", "No se ha seleccionado ningún archivo")
+            return
 
     def abrirArchivo(self):
         self.analizado = False
@@ -179,41 +214,20 @@ class Pantalla_principal():
             # self.filename = os.path.splitext(self.filename)[0]
 
             # Elimina contenido del cuadro
-            self.cuadroTexto.delete(1.0, "end")
+            self.text.delete(1.0, "end")
 
             # set contenido
-            self.cuadroTexto.insert(1.0, self.texto)
+            self.text.insert(1.0, self.texto)
 
         except:
             messagebox.showerror(
                 "Error", "Archivo no soportado")
             return
 
-    def ejecutar(self):
-        # variable para saber si ya se presiono el boton de analizar
-        self.analizado = True
-        # En caso de que despues de analizar un arhivo se analice otro se limpian las listas
-        limpiarListaErrores()
-        limpiarLista()
-        try:
-            instruccion(self.texto)
-            lexemas_grafico()
-            operar_()
-            generarGrafica(str("RESULTADOS_202044192"))
-
-            # set contenido
-            messagebox.showinfo("Analisis completado",
-                                "Analisis realizado con exito, archivo .dot y .pdf generados")
-
-        except:
-            messagebox.showerror(
-                "Error", "No se ha seleccionado ningún archivo")
-            return
-
     def guardar(self):
         try:
             # Tomar datos que esta en el cuadro de texto
-            self.texto = self.cuadroTexto.get(1.0, "end")
+            self.texto = self.text.get(1.0, "end")
 
             archivo = open(self.archivo_seleccionado, 'w', encoding="utf-8")
             archivo.write(self.texto)
@@ -229,7 +243,7 @@ class Pantalla_principal():
     def guardarComo(self):
         try:
             # Tomar datos que esta en el cuadro de texto
-            self.texto = self.cuadroTexto.get(1.0, "end")
+            self.texto = self.text.get(1.0, "end")
 
             self.extensions = [("Archivos txt", f".txt"),
                                ("Archivos lfp", f".lfp"), ("All files", "*")]
@@ -254,15 +268,36 @@ class Pantalla_principal():
             messagebox.showerror(
                 "Error", "Para generar el archivo de errores primero debe de analizar el archivo")
             return
-        try:
-            CrearArchivoErrores()
-            # mensaje de guardado
-            messagebox.showinfo(
-                "Guardado", "Archivo de errores generado con exito")
-        except:
-            messagebox.showerror(
-                "Error", "No se ha podido generar el archivo de errores")
-            return
+        # try:
+        #     CrearArchivoErrores()
+        #     # mensaje de guardado
+        #     messagebox.showinfo(
+        #         "Guardado", "Archivo de errores generado con exito")
+        # except:
+        #     messagebox.showerror(
+        #         "Error", "No se ha podido generar el archivo de errores")
+        #     return
+
+    def ejecutar(self):
+        # variable para saber si ya se presiono el boton de analizar
+        self.analizado = True
+        # En caso de que despues de analizar un arhivo se analice otro se limpian las listas
+        # limpiarListaErrores()
+        # limpiarLista()
+        # try:
+        #     instruccion(self.texto)
+        #     lexemas_grafico()
+        #     operar_()
+        #     generarGrafica(str("RESULTADOS_202044192"))
+
+        #     # set contenido
+        #     messagebox.showinfo("Analisis completado",
+        #                         "Analisis realizado con exito, archivo .dot y .pdf generados")
+
+        # except:
+        #     messagebox.showerror(
+        #         "Error", "No se ha seleccionado ningún archivo")
+        #     return
 
 
 # mostrar pantalla
