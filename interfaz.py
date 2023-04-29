@@ -122,26 +122,27 @@ class Pantalla_principal():
         self.textContainer.place(x=28, y=53)
 
         # cuadro de texto de salida
-        textContainerSalida = Frame(self.pp, borderwidth=1, relief="sunken")
+        self.textContainerSalida = Frame(
+            self.pp, borderwidth=1, relief="sunken")
 
-        text2 = Text(textContainerSalida, font=(
-            "Times New Roman", 15), fg='white', bg="#444654", width=45, height=24, wrap="none", state=DISABLED)
+        self.text2 = Text(self.textContainerSalida, font=(
+            "Times New Roman", 15), fg='white', bg="#444654", width=45, height=24, wrap="none")
 
         textVsb2 = Scrollbar(
-            textContainerSalida, orient="vertical", command=text2.yview)
+            self.textContainerSalida, orient="vertical", command=self.text2.yview)
         textHsb2 = Scrollbar(
-            textContainerSalida, orient="horizontal", command=text2.xview)
-        text2.configure(yscrollcommand=textVsb2.set,
-                        xscrollcommand=textHsb2.set)
+            self.textContainerSalida, orient="horizontal", command=self.text2.xview)
+        self.text2.configure(yscrollcommand=textVsb2.set,
+                             xscrollcommand=textHsb2.set)
 
-        text2.grid(row=0, column=0, sticky="nsew")
+        self.text2.grid(row=0, column=0, sticky="nsew")
         textVsb2.grid(row=0, column=1, sticky="ns")
         textHsb2.grid(row=1, column=0, sticky="ew")
 
-        textContainerSalida.grid_rowconfigure(0, weight=1)
-        textContainerSalida.grid_columnconfigure(0, weight=1)
+        self.textContainerSalida.grid_rowconfigure(0, weight=1)
+        self.textContainerSalida.grid_columnconfigure(0, weight=1)
 
-        textContainerSalida.place(x=650, y=53)
+        self.textContainerSalida.place(x=650, y=53)
 
         # Actualizacion del Frame
         self.Frame.mainloop()
@@ -288,10 +289,23 @@ class Pantalla_principal():
                 messagebox.showinfo("Analisis completado",
                                     "Analisis completado, No se encontraron errores")
 
+                # Elimina contenido del cuadro
+                self.text2.delete(1.0, "end")
+
+                # set contenido
+                self.text2.insert(1.0, lista_mongo)
+
             else:
 
                 messagebox.showerror("Analisis completado",
                                      "Analisis completado, Se encontraron algunos errores")
+
+                # Elimina contenido del cuadro
+                self.text2.delete(1.0, "end")
+
+                # set contenido
+                self.text2.insert(
+                    1.0, "Corrija los errores para poder realizar traducir los comandos a MongoDB")
 
         except:
             messagebox.showerror(
@@ -308,7 +322,7 @@ class Pantalla_principal():
 
         tv = ttk.Treeview(ventana, columns=("col1", "col2", "col3"))
 
-        tv.column("#0", width=100)
+        tv.column("#0", width=100, anchor=CENTER)
         tv.column("#1", width=200, anchor=CENTER)
         tv.column("#2", width=200, anchor=CENTER)
         tv.column("#3", width=200, anchor=CENTER)
@@ -337,7 +351,46 @@ class Pantalla_principal():
         ventana.mainloop()
 
     def errores(self):
-        messagebox.showinfo("Errores", "Boton de Errores presionado")
+
+        ventana = Tk()
+        ventana.title("Tokens | Proyecto 2")
+        self.centrar(ventana, 1100, 320)
+        ventana.geometry("1100x320")
+        ventana.configure(bg="#343541")
+
+        tv = ttk.Treeview(ventana, columns=("col1", "col2", "col3", "col4"))
+
+        tv.column("#0", width=150, anchor=CENTER)
+        tv.column("#1", width=100, anchor=CENTER)
+        tv.column("#2", width=100, anchor=CENTER)
+        tv.column("#3", width=250, anchor=CENTER)
+        tv.column("#4", width=500, anchor=CENTER)
+
+        tv.heading("#0", text="Tipo", anchor=CENTER)
+        tv.heading("#1", text="Fila", anchor=CENTER)
+        tv.heading("#2", text="Columna", anchor=CENTER)
+        tv.heading("#3", text="Token o Lexema", anchor=CENTER)
+        tv.heading("#4", text="Descripcion", anchor=CENTER)
+
+        # Estilos de la tabla
+        style = ttk.Style(tv)
+        style.theme_use("clam")
+
+        style.configure("Treeview", background="white",
+                        fieldbackground="white", foreground="black", font=['Times New Roman', 14, 'normal'])
+
+        style.configure('Treeview.Heading', background="orange", font=[
+                        'Times New Roman', 14, 'normal'])
+
+        for i in range(len(lista_errores)):
+            tipo, fila, columna, lex, desc = lista_errores[i].operar(None)
+
+            tv.insert("", END, text=tipo, values=(
+                fila, columna, lex, desc))
+
+        tv.pack()
+
+        ventana.mainloop()
 
 
 # mostrar pantalla

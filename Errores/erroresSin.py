@@ -8,13 +8,13 @@ class ErrorSintac(Expression):
         super().__init__(fila, columna, token)
 
     def operar(self, no):
-        tipo = 'Tipo: Error Sintactico\n'
-        fila = f'Fila: {self.fila}\n'
-        columna = f'Columna: {self.columna}\n'
-        token = f'Token: {self.token}\n'
-        desc = f'Descripcion: Falta el token {self.token}'
+        tipo = 'Error Sintactico'
+        fila = f'{self.fila}'
+        columna = f'{self.columna}'
+        token = f'{self.token}'
+        desc = f'Falta el token {self.token}'
 
-        return '\n' + tipo + fila + columna + token + desc + "\n"
+        return tipo, fila, columna, token, desc
 
     def getColumna(self):
         return super().getColumna()
@@ -27,3 +27,6 @@ class ErrorSintac(Expression):
 
     def setToken(self, token):
         super().setToken(token)
+
+    # def getDescripcion(token):
+    #     return f "Error: falta el token{self.token}"
