@@ -16,7 +16,7 @@ class Pantalla_principal():
     def __init__(self):
         self.pp = Tk()
         self.pp.title("Pantalla Principal | Proyecto 2")
-        self.centrar(self.pp, 1000, 800)
+        self.centrar(self.pp, 1400, 630)
         self.pp.configure(bg="#343541")
         self.pantalla_1()
 
@@ -28,7 +28,7 @@ class Pantalla_principal():
         r.geometry(f"+{x}+{y}")
 
     def pantalla_1(self):
-        self.Frame = Frame(height=600, width=1100)
+        self.Frame = Frame(height=630, width=1400)
         self.Frame.config(bg="#343541")
         self.Frame.pack(padx=25, pady=25)
         self.text = ''
@@ -43,7 +43,7 @@ class Pantalla_principal():
         # encabezado de cuadro de texto de salida
         Label(self.Frame, text="Salida", font=(
             "Roboto Mono", 18), fg="white",
-            bg="#343541", width=10, justify="left", anchor="w").place(x=623, y=0)
+            bg="#343541", width=10, justify="left", anchor="w").place(x=752, y=0)
 
         # menu archivo
         self.menubar = Menu(self.pp)
@@ -103,7 +103,7 @@ class Pantalla_principal():
         self.textContainer = Frame(self.pp, borderwidth=1, relief="sunken")
 
         self.text = Text(self.textContainer, font=(
-            "Times New Roman", 15), fg='white', bg="#444654", width=45, height=24, wrap="none")
+            "Times New Roman", 15), fg='white', bg="#444654", width=62, height=26, wrap="none")
 
         textVsb = Scrollbar(
             self.textContainer, orient="vertical", command=self.text.yview)
@@ -119,14 +119,14 @@ class Pantalla_principal():
         self.textContainer.grid_rowconfigure(0, weight=1)
         self.textContainer.grid_columnconfigure(0, weight=1)
 
-        self.textContainer.place(x=28, y=53)
+        self.textContainer.place(x=28, y=52)
 
         # cuadro de texto de salida
         self.textContainerSalida = Frame(
             self.pp, borderwidth=1, relief="sunken")
 
         self.text2 = Text(self.textContainerSalida, font=(
-            "Times New Roman", 15), fg='white', bg="#444654", width=45, height=24, wrap="none")
+            "Times New Roman", 15), fg='white', bg="#444654", width=62, height=26, wrap="none")
 
         textVsb2 = Scrollbar(
             self.textContainerSalida, orient="vertical", command=self.text2.yview)
@@ -142,7 +142,7 @@ class Pantalla_principal():
         self.textContainerSalida.grid_rowconfigure(0, weight=1)
         self.textContainerSalida.grid_columnconfigure(0, weight=1)
 
-        self.textContainerSalida.place(x=650, y=53)
+        self.textContainerSalida.place(x=780, y=52)
 
         # Actualizacion del Frame
         self.Frame.mainloop()
@@ -277,9 +277,14 @@ class Pantalla_principal():
         # limpiarListaErrores()
         # limpiarLista()
         try:
+
+            limpiarListas()
+
             instruccion(self.texto)
             asignarToken()
             analizador_sintactico(lista_lexemas)
+
+            # print(len(lista_errores))
 
             if len(lista_errores) == 0:
 
@@ -293,7 +298,7 @@ class Pantalla_principal():
                 self.text2.delete(1.0, "end")
 
                 # set contenido
-                self.text2.insert(1.0, lista_mongo)
+                self.text2.insert(1.0, armarInstrucciones())
 
             else:
 
@@ -305,7 +310,7 @@ class Pantalla_principal():
 
                 # set contenido
                 self.text2.insert(
-                    1.0, "Corrija los errores para poder realizar traducir los comandos a MongoDB")
+                    1.0, "Corrija los errores para poder traducir los comandos a MongoDB")
 
         except:
             messagebox.showerror(

@@ -184,6 +184,24 @@ def instruccion(cadena):
             cadena = cadena[1:]
             puntero = 0
 
+        elif char == "-":
+            lexema, cadena = armarComentario(cadena[puntero-1:])
+            # si no es None ninguna de las dos condiciones entonces
+            if lexema and cadena:
+
+                # no se guarda el comentario, solo se ignora
+                n_columna += len(lexema)
+                puntero = 0
+
+        elif char == "/":
+            lexema, cadena = armarComentarioLargo(cadena[puntero:])
+            # si no es None ninguna de las dos condiciones entonces
+            if lexema and cadena:
+
+                # no se guarda el comentario, solo se ignora
+                n_columna += len(lexema)
+                puntero = 0
+
         elif char == "\t":
             cadena = cadena[4:]
             n_columna += 4
@@ -269,6 +287,87 @@ def armar_dato_json(cadena):
         else:
             # se va agregando letra por letra al lexema
             lexema += char
+    # para evitar que se detenga el problema en caso de un error
+    return None, None
+
+def armarComentario(cadena):
+    global n_linea
+    global n_columna
+    global lista_lexemas
+    lexema = ""
+    puntero = ""
+    no_guion= 0
+    # se recorre toda la cadena con el puntero hasta encontrar un espacio en blanco
+    for char in cadena:
+
+        puntero += char
+
+        if char== '-':
+            no_guion+=1
+
+
+        # Como las mismas comillas se usan para los argumentos de la funcion y para abrir el Json coloque el espacio en blanco y el salto
+        if char=='\n' :
+            if no_guion==3:
+                # en cadena el slicing devuelce desde uno antes del puntero hasta el final
+                return lexema, cadena[len(puntero)-1:]
+            else:
+                lista_errores.append(ErrorSintac(lexema,n_linea, n_columna,"Guion"))
+                return lexema, cadena[len(puntero)-1:]
+        else:
+            # se va agregando letra por letra al lexema
+            lexema += char
+    # para evitar que se detenga el problema en caso de un error
+    return None, None
+
+def armarComentarioLargo(cadena):
+    global n_linea
+    global n_columna
+    global lista_lexemas
+    lexema = ""
+    puntero = ""
+    estadoC= "*"
+    # se recorre toda la cadena con el puntero hasta encontrar un espacio en blanco
+    for char in cadena:
+        
+        puntero += char
+        # si se llego al final de la cadena es porque no esta la barra, por lo cual es un error
+        if len(cadena)== len(puntero):
+            lista_errores.append(ErrorSintac(lexema,n_linea, n_columna,"Barra"))
+            return lexema, cadena[len(puntero)-1:] 
+
+        # comienza con astericos porque la cadena mandada corta el "/"
+        if estadoC=='*':
+            if char=='*':
+                lexema += char
+                estadoC='texto'
+                continue
+            else:
+                print("Error")
+                lista_errores.append(ErrorSintac(lexema,n_linea, n_columna,"Asterisco"))
+                return lexema, cadena[len(puntero)-1:]
+
+        if estadoC=='texto':
+            if char=='/':
+                estadoC='fin'
+                lexema += char
+                continue
+            elif char=='*':
+                lexema += char
+                continue
+            else:
+                lexema += char
+                continue
+            
+        if estadoC=='fin':
+            # se revisa si antes de la barras hay asteriscos
+            if lexema[-2]=='*':
+                # en cadena el slicing devuelce desde uno antes del puntero hasta el final
+                return lexema, cadena[len(puntero)-1:]
+            else:
+                lista_errores.append(ErrorSintac(lexema,n_linea, n_columna,"Asterisco"))
+                return lexema, cadena[len(puntero)-1:]
+
     # para evitar que se detenga el problema en caso de un error
     return None, None
 
@@ -950,6 +1049,25 @@ def transformarMongo():
     #     print(lista_intrucciones[i])
 
 
+def armarInstrucciones():
+    instrucciones= ""
+    for i in range(len(lista_intrucciones)):
+        instrucciones+= lista_intrucciones[i]
+        instrucciones+="\n"
+    
+    return instrucciones
+
+
+def limpiarListas():
+    global n_columna
+    global n_linea
+    lista_intrucciones.clear()
+    lista_errores.clear()
+    lista_lexemas.clear()
+    lista_mongo.clear()
+    lista_intrucciones.clear()
+    n_linea = 1
+    n_columna = 1
 
 def TablaTokens():
 
@@ -964,76 +1082,48 @@ def TablaTokens():
 
 
 entrada = '''
-CrearBD ejemplo = nueva CrearBD(“Data”);  @
+CrearBD ejemplo = nueva CrearBD(“Data”);
 
-EliminarBD elimina = nueva EliminarBD(“Data”); 
+/*
+b
+*jjhjh
+*/
 
-CrearColeccion colec = nueva CrearColeccion(“NombreCrearC”);
-
-EliminarColeccion eliminacolec = nueva EliminarColeccion(“NombreEliminarC”); 
-
-InsertarUnico insertadoc = nueva InsertarUnico(“NombreInsertar” ,
-{
-    { 
-        "nombre" : "Obra Literaria", 
-        "autor" : "Jorge Luis" 
-    } 
-});
-
-ActualizarUnico actualizadoc = nueva ActualizarUnico(“NombreActualizar”, 
-{
-    { 
-    "nombre" : "Obra Literaria" 
-    }, 
-    { 
-    $set: {"autor" : "Mario Vargas"} 
-    } 
-});
-
-EliminarUnico eliminadoc = nueva EliminarUnico(“NombreEliminarUnico”,
-{
-    { 
-    "nombre" : "Obra Literaria" 
-    } 
-});
-
-BuscarTodo todo = nueva BuscarTodo (“NombreColeccion”); 
-
-BuscarUnico todo = nueva BuscarUnico (“NombreColeccion”) 
+EliminarBD elimina = nueva EliminarBD(“Prueba”); 
 
 '''
 
 
 # # Las 3 funciones del analizador
-# instruccion(entrada)
-# asignarToken()
-# analizador_sintactico(lista_lexemas)
+instruccion(entrada)
+asignarToken()
+analizador_sintactico(lista_lexemas)
 
 
-#TablaTokens()
+TablaTokens()
 
 
 
-# # Solo se traduce a Mongo si no hay errores
-# if len(lista_errores)==0: 
+# Solo se traduce a Mongo si no hay errores
+if len(lista_errores)==0: 
         
-#     necesarioparaMongo(lista_lexemas)
-#     print("===== Traduccion =====")
-#     transformarMongo()
+    necesarioparaMongo(lista_lexemas)
+    print("===== Traduccion =====")
+    transformarMongo()
 
-# else:
+else:
 
-#     print(" ")
-#     print("==== ERRORES ====")
-#     for error in lista_errores:
-#         tipo, fila, columna, lex, desc= error.operar(None)
+    print(" ")
+    print("==== ERRORES ====")
+    for error in lista_errores:
+        tipo, fila, columna, lex, desc= error.operar(None)
 
-#         print(tipo)
-#         print(fila)
-#         print(columna)
-#         print(lex)
-#         print(desc)
-#         print(" ")
+        print(tipo)
+        print(fila)
+        print(columna)
+        print(lex)
+        print(desc)
+        print(" ")
         
 
 
