@@ -348,11 +348,12 @@ def armarComentarioLargo(cadena):
                 return lexema, cadena[len(puntero)-1:]
 
         if estadoC=='texto':
-            if char=='/':
-                estadoC='fin'
+            if char=='\n':
                 lexema += char
+                n_linea+=1
                 continue
-            elif char=='*':
+            elif char=='/':
+                estadoC='fin'
                 lexema += char
                 continue
             else:
@@ -1090,7 +1091,7 @@ b
 */
 
 EliminarBD elimina = nueva EliminarBD(“Prueba”); 
-
+@
 '''
 
 
