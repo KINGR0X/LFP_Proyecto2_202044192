@@ -96,7 +96,7 @@ def instruccion(cadena):
             puntero = 0
 
         # comillas que usa argumento de la funcion 
-        elif char == '“':
+        elif char == '“' :
             # se envia al metodo la cadena Con la comilla inicial
             lexema, cadena = armar_parametro(cadena[puntero-1:])
             # si no es None ninguna de las dos condiciones entonces
@@ -116,6 +116,24 @@ def instruccion(cadena):
         elif char == '"':
             # si no es None ninguna de las dos condiciones entonces
             lexema, cadena = armar_dato_json(cadena[puntero:])
+            # si no es None ninguna de las dos condiciones entonces
+            if lexema and cadena:
+
+
+                # Armado de lexema como clase
+                l = Lexema(lexema, n_linea, n_columna,None)
+
+                # se guarda el lexema en la lista
+                lista_lexemas.append(l)
+
+
+                n_columna += len(lexema)
+                puntero = 0
+
+        # solo deberian poder venir numeros como parte del valor del Json, una varioable no puede ser un numero        
+        elif char.isdigit():
+            # si no es None ninguna de las dos condiciones entonces
+            lexema, cadena = armar_lexema(cadena[puntero-1:])
             # si no es None ninguna de las dos condiciones entonces
             if lexema and cadena:
 
@@ -203,7 +221,7 @@ def instruccion(cadena):
                 puntero = 0
 
         elif char == "\t":
-            cadena = cadena[4:]
+            cadena = cadena[1:]
             n_columna += 4
             puntero = 0
 
@@ -238,7 +256,7 @@ def armar_lexema(cadena):
     for char in cadena:
         puntero += char
         # Coloque las comillas en caso de que falte el parentesis 
-        if char == ' '  or char == "(" or char == '“' or char=='"' or char==':':
+        if char == ' '  or char == "(" or char == '“' or char=='"' or char==':' or char==',' or char=='\n': 
             # en cadena el slicing devuelce desde uno antes del puntero hasta el final
             return lexema, cadena[len(puntero)-1:]
         else:
@@ -248,7 +266,7 @@ def armar_lexema(cadena):
     return None, None
 
 
-def armar_parametro(cadena):
+def armar_parametro(cadena): 
     global n_linea
     global n_columna
     global lista_lexemas
@@ -375,7 +393,6 @@ def armarComentarioLargo(cadena):
 
 def asignarToken():
 
-
     lista_solo_lexemas = []
 
     # lista de solo los lexemas, sin columna ni nada
@@ -390,14 +407,18 @@ def asignarToken():
            lista_lexemas[i].setToken(list(reserved.keys())[list(reserved.values()).index(lista_solo_lexemas[i])])
 
         # se asigna el token "Argumento" a los lexemas que empiezan y terminan con comillas, porque se supone que siempre van a venir con ellas
-        elif lista_solo_lexemas[i][0] == '“' and lista_solo_lexemas[i][-1] == '”':  
+        elif lista_solo_lexemas[i][0] == '“' and lista_solo_lexemas[i][-1] == '”' :  
             lista_lexemas[i].setToken("Argumento")
 
         # se asigna el token "Parte_json" a los lexemas que empiezan y terminan con comillas de JSon, porque se supone que siempre van a venir con ellas
         elif lista_solo_lexemas[i][0] == '"' and lista_solo_lexemas[i][-1] == '"':  
             lista_lexemas[i].setToken("Parte_json")
 
-        elif lista_solo_lexemas[i][0].isalpha()==True and lista_solo_lexemas[i][-1].isalpha()==True:
+        # si es un numero su token es "parte_json"
+        elif lista_solo_lexemas[i].isdigit()==True:
+            lista_lexemas[i].setToken("Parte_json")
+
+        elif (lista_solo_lexemas[i][0].isalpha()==True and lista_solo_lexemas[i][-1].isalpha()==True) or (lista_solo_lexemas[i][0].isalpha()==True and lista_solo_lexemas[i][-1].isdigit()==True):
             lista_lexemas[i].setToken("Identificador")
 
 
@@ -1083,48 +1104,89 @@ def TablaTokens():
 
 
 entrada = '''
-CrearBD ejemplo = nueva CrearBD(“Data”);
+CrearBD cali = nueva CrearBD(“Data”);
+CrearColeccion colec = nueva CrearColeccion(“Coleccion1”);
+CrearColeccion colec2 = nueva CrearColeccion(“Coleccion2”);
+CrearColeccion colec3 = nueva CrearColeccion(“Coleccion3”);
+InsertarUnico uno = nueva InsertarUnico(“Coleccion1”,
+{
+	{
+		"id": 1,
+		"nombre": "Calificacion 1",
+		"anio": 2023,
+		"curso": "Lenguajes Formales y de Programacion"
+	}
+});
 
-/*
-b
-*jjhjh
-*/
+InsertarUnico dos = nueva InsertarUnico(“Coleccion1”,
+{
+	{
+		"id": 1,
+		"nombre": "Calificacion 2",
+		"anio": 2023,
+		"curso": "Introduccion a la Programacion 2"
+	}
+});
 
-EliminarBD elimina = nueva EliminarBD(“Prueba”); 
-@
+
+EliminarColeccion c1 = nueva EliminarColeccion(“Coleccion2”);
+
+ActualizarUnico ac1 = nueva ActualizarUnico(“Coleccion1”,
+{
+	{
+		"id" : 1
+	},
+	{
+		$set: {"curso": "Oficialmente estoy en Compi 1"}
+	}
+}
+);
+
+
+EliminarUnico el1 = nueva EliminarUnico(“Coleccion1”,
+{
+	{
+		"id" : 2
+	}
+
+}
+);
+
+
+BuscarTodo todo = nueva BuscarTodo(“Coleccion1”);
 '''
 
 
 # # Las 3 funciones del analizador
-instruccion(entrada)
-asignarToken()
-analizador_sintactico(lista_lexemas)
+# instruccion(entrada)
+# asignarToken()
+# analizador_sintactico(lista_lexemas)
 
 
-TablaTokens()
+# TablaTokens()
 
 
 
 # Solo se traduce a Mongo si no hay errores
-if len(lista_errores)==0: 
+# if len(lista_errores)==0: 
         
-    necesarioparaMongo(lista_lexemas)
-    print("===== Traduccion =====")
-    transformarMongo()
+#     necesarioparaMongo(lista_lexemas)
+#     print("===== Traduccion =====")
+#     transformarMongo()
 
-else:
+# else:
 
-    print(" ")
-    print("==== ERRORES ====")
-    for error in lista_errores:
-        tipo, fila, columna, lex, desc= error.operar(None)
+#     print(" ")
+#     print("==== ERRORES ====")
+#     for error in lista_errores:
+#         tipo, fila, columna, lex, desc= error.operar(None)
 
-        print(tipo)
-        print(fila)
-        print(columna)
-        print(lex)
-        print(desc)
-        print(" ")
+#         print(tipo)
+#         print(fila)
+#         print(columna)
+#         print(lex)
+#         print(desc)
+#         print(" ")
         
 
 
