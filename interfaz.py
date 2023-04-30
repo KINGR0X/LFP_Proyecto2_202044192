@@ -198,12 +198,12 @@ class Pantalla_principal():
 
             self.texto = x
 
-            # # se separa el nombre del archivo en directorio y nombre
-            # os.path.split(filename)
-            # # se obtiene el nombre del archivo con la extension
-            # self.filename = os.path.split(filename)[1]
-            # # se obtiene el nombre del archivo sin la extension
-            # self.filename = os.path.splitext(self.filename)[0]
+            # se separa el nombre del archivo en directorio y nombre
+            os.path.split(filename)
+            # se obtiene el nombre del archivo con la extension
+            self.filename = os.path.split(filename)[1]
+            # se obtiene el nombre del archivo sin la extension
+            self.filename = os.path.splitext(self.filename)[0]
 
             # Elimina contenido del cuadro
             self.text.delete(1.0, "end")
@@ -299,6 +299,8 @@ class Pantalla_principal():
 
                 # set contenido
                 self.text2.insert(1.0, armarInstrucciones())
+
+                generarGrafica(str(self.filename))
 
             else:
 

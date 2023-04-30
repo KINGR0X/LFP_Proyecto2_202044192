@@ -1,6 +1,7 @@
 from Abstract.lexema import *
 from Errores.erroresLex import *
 from Errores.erroresSin import *
+import os
 
 #  token | lexema
 reserved = {
@@ -1065,7 +1066,6 @@ def transformarMongo():
             nombreC=nombreC.strip('”')
             lista_intrucciones.append(f"db.{nombreC}.findOne();")
 
-
     # #imprimir lista de instrucciones
     # for i in range(len(lista_intrucciones)):
     #     print(lista_intrucciones[i])
@@ -1102,6 +1102,31 @@ def TablaTokens():
         print("Fila ==>", lista_lexemas[i].getFila())
         print("Columna ==>", lista_lexemas[i].getColumna())
 
+
+def generarGrafica(nombreGrafica):
+
+    nombre = nombreGrafica+".txt"
+
+    # Creación del dot
+    with open(nombre, 'w') as f:
+        f.write(armarInstrucciones())
+
+    # creamos la imagen
+    os.system(
+        f'dot -Tpdf {nombre} -o {nombreGrafica}.txt')
+
+    # obtener direccion actual
+    ruta = os.path.dirname(os.path.abspath(f"{nombreGrafica}.txt"))
+
+    # reta del pdf
+    archivo_pdf = ruta+f"\{nombreGrafica}.txt"
+
+    path = f'{archivo_pdf}'
+
+    print(path)
+
+    # Abrir pdf en el navegador
+    os.system(f'start notepad {path}')
 
 entrada = '''
 CrearBD cali = nueva CrearBD(“Data”);
