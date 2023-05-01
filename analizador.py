@@ -937,6 +937,7 @@ def unirJson(cadena):
     # para evitar que se detenga el problema en caso de un error
     return None, None
 
+
 def necesarioparaMongo(lista):
     global lista_mongo
 
@@ -1091,19 +1092,19 @@ def limpiarListas():
     n_linea = 1
     n_columna = 1
 
-def TablaTokens():
+# def TablaTokens():
 
-    global lista_lexemas
+#     global lista_lexemas
 
-    for i in range(len(lista_lexemas)):
-        print("=====================================")
-        print("Lexema ==>", lista_lexemas[i].operar(None))
-        print("Token ==>", lista_lexemas[i].getToken())
-        print("Fila ==>", lista_lexemas[i].getFila())
-        print("Columna ==>", lista_lexemas[i].getColumna())
+#     for i in range(len(lista_lexemas)):
+#         print("=====================================")
+#         print("Lexema ==>", lista_lexemas[i].operar(None))
+#         print("Token ==>", lista_lexemas[i].getToken())
+#         print("Fila ==>", lista_lexemas[i].getFila())
+#         print("Columna ==>", lista_lexemas[i].getColumna())
 
 
-def generarGrafica(nombreGrafica):
+def generarArchivo(nombreGrafica):
 
     nombre = nombreGrafica+".txt"
 

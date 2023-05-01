@@ -7,7 +7,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkinter import scrolledtext
 from tkinter.filedialog import asksaveasfilename
-from analizador_lexico import *
+from analizador import *
 import os
 
 
@@ -300,7 +300,7 @@ class Pantalla_principal():
                 # set contenido
                 self.text2.insert(1.0, armarInstrucciones())
 
-                generarGrafica(str(self.filename))
+                generarArchivo(str(self.filename))
 
             else:
 
