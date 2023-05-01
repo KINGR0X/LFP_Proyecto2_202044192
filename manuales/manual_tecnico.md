@@ -675,3 +675,67 @@ La función abrirArchivo(self) se encarga de abrir un archivo de texto y mostrar
 ```
 
 El resto de funciones dentro del archivo Interfaz siguen la misma logica.
+
+## Gramática libre de contexto
+
+La gramatica libre de contexto utilizada para el analisis sintactico es la siguiente:
+
+```
+LEXICO:
+CrearDB
+EliminarDB
+CrearColeccion
+EliminarColeccion
+InsertarUnico
+ActualizarUnico
+EliminarUnico
+BuscarTodo
+BuscarUnico
+nueva
+(
+)
+;
+=
+ID -> [a-z*A-Z*][a-z_A-Z_0-9]_
+NUMERO -> [0-9]+
+STRING -> "[^"]_"
+IGNORE -> \t\r
+COMENTARIOS -> //._
+| /\*([^_]|\*+[^*/])\*\*+/
+"
+
+SINTACTICO:
+init : instrucciones
+
+    instrucciones : instruccion instrucciones
+                | instruccion
+
+    instruccion : crearDB ;
+                | eliminarDB ;
+                | crearColeccion ;
+                | eliminarColeccion ;
+                | insertarUnico ;
+                | actualizarUnico ;
+                | eliminarUnico ;
+                | buscarTodo ;
+                | buscarUnico ;
+
+    crearDB : CrearDB ID = nueva CrearDB ( )
+
+    eliminarDB : EliminarDB ID = nueva EliminarDB ( )
+
+    crearColeccion : CrearColeccion ID = nueva CrearColeccion ( STRING )
+
+    eliminarColeccion : EliminarColeccion ID = nueva EliminarColeccion ( STRING )
+
+    insertarUnico : InsertarUnico ID = nueva InsertarUnico ( STRING , STRING )
+
+    actualizarUnico : ActualizarUnico ID = nueva ActualizarUnico ( STRING , STRING )
+
+    eliminarUnico : EliminarUnico ID = nueva EliminarUnico ( STRING )
+
+    buscarTodo : BuscarTodo ID = nueva BuscarTodo ( STRING )
+
+    buscarUnico : BuscarUnico ID = nueva BuscarUnico ( STRING )
+
+```
